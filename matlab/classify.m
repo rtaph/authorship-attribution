@@ -2,11 +2,11 @@
 % --- Use this when changing the parameters in the python script ---
 
 % -c: character ngrams, ngram size, ngrams used
-params = '-c 3 5';
+params = '-c 3 200';
 
 fprintf(strcat(['Calling Python script with arguments: ', params, '\n']));
 [status, fileStr] = system(strcat(['python ../python/nltk_test.py ', params]));
-files = regexp(fileStr,'\n','split')
+files = regexp(fileStr,'\n','split');
 fprintf(strcat('File containing character n-gram freqs: ', char(files(1)), '\n'));
 data = load(char(files(1)));
 % Read possible classes, must be integers starting at 1

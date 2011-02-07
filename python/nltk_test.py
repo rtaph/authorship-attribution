@@ -19,9 +19,9 @@ FUNCTION_WORDS = False
 # TODO: How can this be dynamic?
 CORPUS_ROOT = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set2"
 # TODO: How can this be dynamic?
-FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/python/out.txt"
-#CH_NGRAM_FREQS = "/Users/epb/Documents/uni/kandidat/speciale/code/python/out.txt"
-CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/python/cat.txt"
+FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
+#CH_NGRAM_FREQS = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
+CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 # TODO: Dynamic
 FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zlch06"
 
@@ -85,14 +85,15 @@ possible_categories = {"hamilton": 1, "madison": 2, "jay": 3}
 
 ## CHAR N-GRAM VARIABLES 
 
-all_char_ngrams = [] # All n-grams found in entire corpus
-text_char_ngrams_freqs = [] # The frequency of char n-grams found in each text
-#n_char_ngrams = []
+if CHAR_NGRAMS:
+    all_char_ngrams = [] # All n-grams found in entire corpus
+    text_char_ngrams_freqs = [] # The frequency of char n-grams found in each text   
 
 ## WORD N-GRAM VARIABLES
 
-all_wd_ngrams = []
-wrd_fd_list = []
+if WRD_NGRAMS:
+    all_wd_ngrams = []
+    wrd_fd_list = []
 
 ## FUNCTION WORD VARIABLES
 
@@ -100,10 +101,13 @@ if FUNCTION_WORDS:
     func_wrds = load_wrds(FUNC_FOLDER)
 
 
+######## ANALYZE TEXTS ########
 
 for text in corpus.fileids():
     
     # TODO: can I reuse any word or character lists?
+    wrd_tokens = corpus.words(text)
+    lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
     
     # Find category in filename
     found_category = ""
@@ -120,34 +124,24 @@ for text in corpus.fileids():
     #### FUNCTION WORDS ####
     
     if FUNCTION_WORDS:
-        wrd_tokens = corpus.words(text)
-        wrd_tokens = [w.lower() for w in wrd_tokens if w.isalnum()]
-        
+        my_func_wrds = [w for w in lower_wrds if func_wrds.count(w) > 0]
+        print my_func_wrds
     
     
-    ######## CHARS #############
+    ######## CHAR N-GRAMS #############
     
     if CHAR_NGRAMS:
         text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
         char_ngrams = ngrams(text_str, NGRAM_SIZE)
-        
-        
-        
-        char_ngrams_freqs = FreqDist(char_ngrams)
-        #n_char_ngrams.append(char_ngrams_freqs.N())
-        
-        text_char_ngrams_freqs.append(char_ngrams_freqs)
-        
+        text_char_ngrams_freqs.append(FreqDist(char_ngrams))
         all_char_ngrams.extend(char_ngrams)
     
     
-    ######## WORDS #############
+    ######## WORD N-GRAMS #############
     
     if WRD_NGRAMS:
         #break
         #print ""
-        wrd_tokens = corpus.words(text)
-        wrd_tokens = [w.lower() for w in wrd_tokens if w.isalnum()]
         #print wrd_tokens[:10]
         wrd_ng = ngrams(wrd_tokens, NGRAM_SIZE)
         #print NGRAM_SIZE, "-grams (words):", len(wrd_ng)
@@ -168,43 +162,39 @@ for text in corpus.fileids():
         #break
     
 
+##### SAVE FUNCTION WORDS AS FEATURES
+
+if FUNCTION_WORDS:
+    # TODO
+    pass
     
-######### CHARS ##########
+
+    
+##### SAVE CHAR N-GRAMS AS FEATURES
 
 if CHAR_NGRAMS:
         
     # Frequency of all possible n-grams across corpus    
     all_char_ngrams_freqs = FreqDist(all_char_ngrams)
     
-
     # Select char n-gram features
-    #for a in range(len(text_char_ngrams_freqs)):
     for t in range(n_texts):
         freqs = text_char_ngrams_freqs[t]
-        #print freqs
-        #n_ngrams = float(n_char_ngrams[t])
-        n_ngrams = freqs.N() # no. of n-grams in text
         
-        # Step through X most frequent n-grams across corpus and calculate a
-        # relative frequency for each n-gram in each text 
+        # Step through X most frequent n-grams across corpus, the feature is the
+        # relative frequency for each n-gram in each text
         for r in range(NO_OF_NGRAMS_USED):
             ngram = all_char_ngrams_freqs.keys()[r]
             freq = freqs.freq(ngram)
             feature_matrix[t].append(freq)
-            #print ngram, freq
-            #l = l + str(freqs[all_char_ngrams_freqs.keys()[r]] / n_ngrams) + " "
-            #feature_matrix[t].append(freqs[ngram] / n_ngrams)
 
 
-######### WORDS ##########
+##### SAVE WORD N-GRAMS AS FEATURES
+# TODO!
 
 if WRD_NGRAMS:
     
     all_wd_fd = FreqDist(all_wd_ngrams)
-    #print all_wd_fd.items()[:20]
-    #all_wd_fd.plot(200, cumulative=True)
-    #print all_wd_fd.keys()[0]
-    #print all_wd_fd.keys()[1]
     
     # Print some frequencies
     #for a in wrd_fd_list:
@@ -230,28 +220,3 @@ for c in text_classes:
     cf.write(str(c) + "\n")
 cf.flush()
 print CATEGORY_FILE
-
-
-
-
-
-
-
-#### UNUSED ####
-
-#print all_char_ngrams_freqs.items()[:20]
-#print all_char_ngrams_freqs.keys()[0]
-#print all_char_ngrams_freqs.keys()[1]
-
-# Print some frequencies
-#print "["
-#for a in range(len(text_char_ngrams_freqs)):
-#    freqs = text_char_ngrams_freqs[a]
-#    print freqs[all_char_ngrams_freqs.keys()[0]] / float(n_char_ngrams[a]), ",",  freqs[all_char_ngrams_freqs.keys()[1]] / float(n_char_ngrams[a]), freqs[all_char_ngrams_freqs.keys()[2]] / float(n_char_ngrams[a]), ",",  freqs[all_char_ngrams_freqs.keys()[3]] / float(n_char_ngrams[a]), ";"
-#print "]"
-
-# Print found categories
-#print "["
-#for features in text_classes:
-#    print  features, ";"
-#print "]"

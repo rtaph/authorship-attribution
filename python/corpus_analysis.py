@@ -9,10 +9,12 @@ import os
 #text4.dispersion_plot(["citizens", "democracy", "freedom", "duties", "America"])
 
 WRD_NGRAMS = False
+WRD_NGRAM_SIZE = 3
+N_WRD_NGRAMS = 10
 
 CHAR_NGRAMS = False
-NGRAM_SIZE = 3
-NO_OF_NGRAMS_USED = 10
+CHAR_NGRAM_SIZE = 3
+N_CHAR_NGRAMS = 10
 
 FUNCTION_WORDS = False
 
@@ -53,15 +55,24 @@ while a < len(sys.argv):
     if arg == "-c":
         CHAR_NGRAMS = True
         if a+1 < len(sys.argv) and not sys.argv[a+1].startswith("-"):
-            NGRAM_SIZE = int(sys.argv[a+1])
+            CHAR_NGRAM_SIZE = int(sys.argv[a+1])
             i = i + 1
         if a+2 < len(sys.argv) and not sys.argv[a+2].startswith("-"):
-            NO_OF_NGRAMS_USED = int(sys.argv[a+2])
+            N_CHAR_NGRAMS = int(sys.argv[a+2])
             i = i + 1
         
     # Function words
     elif arg == "-f":
         FUNCTION_WORDS = True
+        
+    elif arg == "-w":
+        WRD_NGRAMS = True
+        if a+1 < len(sys.argv) and not sys.argv[a+1].startswith("-"):
+            WRD_NGRAM_SIZE = int(sys.argv[a+1])
+            i = i + 1
+        if a+2 < len(sys.argv) and not sys.argv[a+2].startswith("-"):
+            N_WRD_NGRAMS = int(sys.argv[a+2])
+            i = i + 1
             
     a = a + i
             
@@ -93,12 +104,14 @@ if CHAR_NGRAMS:
 
 if WRD_NGRAMS:
     all_wd_ngrams = []
-    wrd_fd_list = []
+    text_wrd_ngram_freqs = []
 
 ## FUNCTION WORD VARIABLES
 
 if FUNCTION_WORDS:
     func_wrds = load_wrds(FUNC_FOLDER)
+    #print len(func_wrds)
+    text_funcwrd_freqs = []
 
 
 ######## ANALYZE TEXTS ########
@@ -125,14 +138,14 @@ for text in corpus.fileids():
     
     if FUNCTION_WORDS:
         my_func_wrds = [w for w in lower_wrds if func_wrds.count(w) > 0]
-        print my_func_wrds
+        text_funcwrd_freqs.append(FreqDist(my_func_wrds))
     
     
     ######## CHAR N-GRAMS #############
     
     if CHAR_NGRAMS:
         text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-        char_ngrams = ngrams(text_str, NGRAM_SIZE)
+        char_ngrams = ngrams(text_str, CHAR_NGRAM_SIZE)
         text_char_ngrams_freqs.append(FreqDist(char_ngrams))
         all_char_ngrams.extend(char_ngrams)
     
@@ -140,33 +153,21 @@ for text in corpus.fileids():
     ######## WORD N-GRAMS #############
     
     if WRD_NGRAMS:
-        #break
-        #print ""
-        #print wrd_tokens[:10]
-        wrd_ng = ngrams(wrd_tokens, NGRAM_SIZE)
-        #print NGRAM_SIZE, "-grams (words):", len(wrd_ng)
-        #print "Example:", wrd_ng[:20]
-        wrd_fd = FreqDist(wrd_ng)
-        #print wrd_fd.items()[:10] # ordered by decreasing frequency
-        
-        wrd_fd_list.append(wrd_fd)
-        
+        wrd_ng = ngrams(lower_wrds, WRD_NGRAM_SIZE)
+        text_wrd_ngram_freqs.append(FreqDist(wrd_ng))
         all_wd_ngrams.extend(wrd_ng)
-        
-        #wrd_fd.plot(cumulative=True)     
-        
-        #i = i + 1
-        #if i >= MAX:
-        #    break
-        
-        #break
     
 
-##### SAVE FUNCTION WORDS AS FEATURES
+##### SAVE FREQS OF FUNCTION WORDS AS FEATURES
 
 if FUNCTION_WORDS:
-    # TODO
-    pass
+    
+    for t in range(n_texts):
+        freqs = text_funcwrd_freqs[t]
+        
+        for f in func_wrds:
+            freq = freqs.freq(f)
+            feature_matrix[t].append(freq)
     
 
     
@@ -176,6 +177,7 @@ if CHAR_NGRAMS:
         
     # Frequency of all possible n-grams across corpus    
     all_char_ngrams_freqs = FreqDist(all_char_ngrams)
+    tot_ngrams = min([N_CHAR_NGRAMS, all_char_ngrams_freqs.B()])
     
     # Select char n-gram features
     for t in range(n_texts):
@@ -183,23 +185,29 @@ if CHAR_NGRAMS:
         
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text
-        for r in range(NO_OF_NGRAMS_USED):
+        for r in range(tot_ngrams):
             ngram = all_char_ngrams_freqs.keys()[r]
             freq = freqs.freq(ngram)
             feature_matrix[t].append(freq)
 
 
 ##### SAVE WORD N-GRAMS AS FEATURES
-# TODO!
 
 if WRD_NGRAMS:
     
-    all_wd_fd = FreqDist(all_wd_ngrams)
+    all_wrd_ngrams_freqs = FreqDist(all_wd_ngrams)
+    tot_ngrams = min([N_WRD_NGRAMS, all_wrd_ngrams_freqs.B()])
     
-    # Print some frequencies
-    #for a in wrd_fd_list:
-        #print a.keys().count(all_wd_fd.keys()[0])
-        #print a.count(all_wd_fd.keys()[0])
+    # Select word n-gram features
+    for t in range(n_texts):
+        freqs = text_wrd_ngram_freqs[t]
+        
+        # Step through X most frequent n-grams across corpus, the feature is the
+        # relative frequency for each n-gram in each text
+        for r in range(tot_ngrams):
+            ngram = all_wrd_ngrams_freqs.keys()[r]
+            freq = freqs.freq(ngram)
+            feature_matrix[t].append(freq)
 
 
 

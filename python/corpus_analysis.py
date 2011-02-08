@@ -65,13 +65,20 @@ while a < len(sys.argv):
     elif arg == "-f":
         FUNCTION_WORDS = True
         
+    # Word n-grams
     elif arg == "-w":
         WRD_NGRAMS = True
         if a+1 < len(sys.argv) and not sys.argv[a+1].startswith("-"):
             WRD_NGRAM_SIZE = int(sys.argv[a+1])
             i = i + 1
-        if a+2 < len(sys.argv) and not sys.argv[a+2].startswith("-"):
-            N_WRD_NGRAMS = int(sys.argv[a+2])
+            if a+2 < len(sys.argv) and not sys.argv[a+2].startswith("-"):
+                N_WRD_NGRAMS = int(sys.argv[a+2])
+                i = i + 1
+            
+    # Corpus
+    elif arg == "-r":
+        if a+1 < len(sys.argv) and not sys.argv[a+1].startswith("-"):
+            CORPUS_ROOT = sys.argv[a+1]
             i = i + 1
             
     a = a + i

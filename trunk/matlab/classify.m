@@ -2,7 +2,7 @@
 %params = '-c 3 200';
 %params = '-f -c 3 200';
 %params = '-w 2 5';
-params = '-f -r /Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set5';
+params = '-f -r /Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set4';
 
 fprintf(strcat(['Calling Python script with arguments: ', params, '\n']));
 [status, fileStr] = system(strcat(['python ../python/corpus_analysis.py ', params]));
@@ -13,8 +13,8 @@ data = load(char(files(1)));
 fprintf(strcat(['Class-file: ', char(files(2)), '\n']));
 classes = load(char(files(2)));
 
-% data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
-% classes = load( '/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt')
+%data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
+%classes = load( '/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt')
 
 nClasses = max(classes);
 
@@ -26,50 +26,15 @@ foldIndices = crossvalind('Kfold',classes,k);
 for i=1:k
 
     % votes for a text belonging to a class
-    votes = zeros(size(data,1),nClasses);
+    %votes = zeros(size(data,1),nClasses);
     
     % find indices of data/classes that will be used for training/test
     testIndices = (foldIndices == i)
     trainIndices = ~testIndices;
     allTestClasses = classes(testIndices);
     
-    % All vs. all
-    % TODO: We could do cross-validation as the inner loop,
-    % but will it make a difference (crossvalind seems to generate
-    % partitions of non-equal size in some cases anyway, try
-    % crossvalind('Kfold',[3;3;3;2;2;2],2))
-    for c=1:nClasses
-        for d=(c+1):nClasses
-            
-            cIndices = classes == c;
-            dIndices = classes == d;
-            cdIndices = cIndices + dIndices;
-            
-            cdTestIndices = logical(testIndices .* cdIndices);
-            cdTrainIndices = logical(trainIndices .* cdIndices);
-            
-            testData = data(cdTestIndices,:);
-            trainData = data(cdTrainIndices,:);
-            
-            testClasses = classes(cdTestIndices);
-            trainClasses = classes(cdTrainIndices);
-            
-            % Train classifier
-            svmStruct = svmtrain(trainData,trainClasses);
-            
-            % Test classifier
-            cdClassified = svmclassify(svmStruct,testData);
-
-            % Place vote
-            nClassified = size(cdClassified,1);
-            myVote = zeros(nClassified,nClasses);
-            for l=1:nClassified
-                myVote(l,cdClassified(l)) = 1;
-            end
-            votes(cdTestIndices,:) = votes(cdTestIndices,:) + myVote;
-            
-        end
-    end
+    % Classification
+    votes = classifyava(data,classes,testIndices,trainIndices);
     
     % Evaluate vote. The highest vote to achieve is nClasses-1, as this
     % is the number of pairs each class participates in.

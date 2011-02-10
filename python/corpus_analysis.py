@@ -97,8 +97,9 @@ feature_matrix = [[] for i in range(n_texts)]
 # List of classes, one for each text in corpus
 text_classes = []
 
-# TODO: Needed?
-possible_categories = {"hamilton": 1, "madison": 2, "jay": 3}
+# TODO: Needed? Make dynamic?
+# Longest names must be first
+#possible_categories = {"hamilton": 1, "madison": 2, "jay": 3}
 
 
 ## CHAR N-GRAM VARIABLES 
@@ -130,11 +131,13 @@ for text in corpus.fileids():
     lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
     
     # Find category in filename
-    found_category = ""
-    for features in possible_categories.keys():
-        if text.count(features):
-            found_category = possible_categories[features]
-            break # only one category per file
+    #cat_start = text.rfind("_") + 1
+    found_category = (text.rpartition("_")[2]).partition(".")[0]
+    #found_category = ""
+    #for k in possible_categories.keys():
+    #    if text.count(k) > 0:
+    #        found_category = possible_categories[k]
+    #        break # only one category per file
     text_classes.append(found_category)
     
     #print ""
@@ -230,8 +233,13 @@ print FEATURE_FILE
 
 #### PUT CLASSES IN A FILE ####
 
+distinct_classes = list(set(text_classes))
+#print distinct_classes
+#int_classes = range(1,len(text_classes))
 cf = open(CATEGORY_FILE,'w')
 for c in text_classes:
-    cf.write(str(c) + "\n")
+    i = distinct_classes.index(c) + 1
+    #cf.write(str(c) + "\n")
+    cf.write(str(i) + "\n")
 cf.flush()
 print CATEGORY_FILE

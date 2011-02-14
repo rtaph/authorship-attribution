@@ -1,25 +1,28 @@
+tic;
+
 RUN_PYTHON = false;
 
 if RUN_PYTHON
-    %params = '-c 3 200';
+    %params = '-c 3 300 -w 3 300';
+    %params = '-c 3 300 -w 3 300 -r /Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set2';
     %params = '-f -c 3 200';
-    %params = '-w 2 5';
+    %params = '-w -c';
     %params = '-f -c 3 200 -w 2 50 -r /Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set5';
-    params = '-f -w 2 50 -r /Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set6';
+    params = '-c 3 200 -r /Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set2';
 
     fprintf(strcat(['Calling Python script with arguments: ', params, '\n']));
-    [status, fileStr] = system(strcat(['python ../python/corpus_analysis.py ', params]));
-    files = regexp(fileStr,'\n','split');
-    fprintf(strcat(['Feature-file: ', char(files(1)), '\n']));
-    data = load(char(files(1)));
+    [status, pythonOut] = system(strcat(['python ../python/corpus_analysis.py ', params]));
+    fprintf(pythonOut);
+    %files = regexp(pythonOut,'\n','split');
+    %fprintf(strcat(['Feature-file: ', char(files(1)), '\n']));
+    %data = load(char(files(1)));
     % Read possible classes, must be integers starting at 1
-    fprintf(strcat(['Class-file: ', char(files(2)), '\n']));
-    classes = load(char(files(2)));
-else
-    data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
-    classes = load( '/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
+    %fprintf(strcat(['Class-file: ', char(files(2)), '\n']));
+    %classes = load(char(files(2)));
 end
 
+data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
+classes = load( '/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
 nClasses = max(classes);
 
 k = 5;
@@ -28,6 +31,8 @@ classPrecisions = zeros(nClasses,k); % precision per class
 classRecalls = zeros(nClasses,k); % recall per class
 foldIndices = crossvalind('Kfold',classes,k);
 for i=1:k
+    
+    %fprintf(strcat(['CV-iteration ', int2str(i), '\n']));
 
     % votes for a text belonging to a class
     %votes = zeros(size(data,1),nClasses);
@@ -39,28 +44,15 @@ for i=1:k
     
     % TODO: Should be possible to use SVM with different parameters from
     % here
-    
-    % Classification
-    votes = classifyava(data,classes,testIndices,trainIndices);
-    
     % TODO: We use "don't knows' in ava so this should be mentioned
     
-    % Evaluate vote. The highest vote to achieve is nClasses-1, as this
-    % is the number of pairs each class participates in.
-    votes = votes(testIndices,:);
-    classified = zeros(size(testClasses,1),1);
-    for v=1:size(votes,1)
-        [high, class] = max(votes(v,:));
-        
-        % Make sure we only have _one_ winner
-        if sum(ismember(votes(v,:),high)) == 1
-            classified(v) = class;
-        end
-    end
-    %classified
-    correctClassified = classified == testClasses;
+    % Classification
+    %classified = classifyava(data,classes,testIndices,trainIndices);
+    classified = classifyova(data,classes,testIndices,trainIndices);
     
     % ----------- Performance measures -----------------
+    
+    correctClassified = classified == testClasses;
     
     % accuracy
     a = (sum(correctClassified))/size(classified,1);
@@ -99,5 +91,7 @@ avgAccuracy = mean(accuracies)
 avgClassPrecisions = meanwithnan(classPrecisions)
 %classRecalls
 avgClassRecalls = meanwithnan(classRecalls)
+
+toc;
 
 fprintf('\n------------------------- Done -------------------------\n\n');

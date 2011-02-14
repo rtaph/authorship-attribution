@@ -1,4 +1,4 @@
-function votes = classifyava(data, classes, testIndices, trainIndices)
+function classified = classifyava(data, classes, testIndices, trainIndices)
 % SVM multiclass classification using All vs. All.
 %
 % Input
@@ -14,16 +14,14 @@ function votes = classifyava(data, classes, testIndices, trainIndices)
 %
 % Output
 % ------
-% votes: A matrix (n x q) of votes of which class each text of the data
-% belongs to. Each row corresponds to a text, each column, i contains the
-% no. of votes for the text belonging to class i. Only texts used for test
-% will have votes larger than 0.
+% classified: A vector of length sum(testIndices), with a the class of each
+% text in the test-set.
 
 nClasses = max(classes);
 
 % votes for a text belonging to a class
 votes = zeros(size(data,1),nClasses);
-    
+
 for c=1:nClasses
     for d=(c+1):nClasses
         
@@ -45,6 +43,7 @@ for c=1:nClasses
         
         % Test classifier
         cdClassified = svmclassify(svmStruct,testData);
+        %pause
         
         % Place vote for one of the two classes, c and d
         nClassified = size(cdClassified,1);
@@ -52,7 +51,21 @@ for c=1:nClasses
         for l=1:nClassified
             myVote(l,cdClassified(l)) = 1;
         end
+        %myVote
         votes(cdTestIndices,:) = votes(cdTestIndices,:) + myVote;
-        
+        %votes(cdTestIndices,:)
+    end
+end
+
+% Evaluate vote. The highest vote to achieve is nClasses-1, as this
+% is the number of pairs each class participates in.
+votes = votes(testIndices,:);
+classified = zeros(sum(testIndices),1);
+for v=1:size(votes,1)
+    [high, class] = max(votes(v,:));
+    
+    % Make sure we only have _one_ winner
+    if sum(ismember(votes(v,:),high)) == 1
+        classified(v) = class;
     end
 end

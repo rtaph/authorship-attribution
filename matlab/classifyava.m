@@ -24,7 +24,8 @@ votes = zeros(size(data,1),nClasses);
 
 for c=1:nClasses
     for d=(c+1):nClasses
-        
+        c
+        d
         cIndices = classes == c;
         dIndices = classes == d;
         cdIndices = cIndices + dIndices;
@@ -39,6 +40,8 @@ for c=1:nClasses
         trainClasses = classes(cdTrainIndices);
         
         % Train classifier
+        %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function','rbf');
+        %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function','quadratic');
         svmStruct = svmtrain(trainData,trainClasses);
         
         % Test classifier
@@ -53,7 +56,8 @@ for c=1:nClasses
         end
         %myVote
         votes(cdTestIndices,:) = votes(cdTestIndices,:) + myVote;
-        %votes(cdTestIndices,:)
+        votes(testIndices,:)
+        
     end
 end
 

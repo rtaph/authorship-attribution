@@ -1,8 +1,9 @@
-tic;
+function [] = aa_classify (runPython, method)
 
-RUN_PYTHON = false;
+%RUN_PYTHON = false;
+%METHOD = 'AVA'; % AVA or OVA
 
-if RUN_PYTHON
+if runPython
     %params = '-c 3 300 -w 3 300';
     %params = '-c 3 300 -w 3 300 -r /Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set2';
     %params = '-f -c 3 200';
@@ -23,9 +24,10 @@ end
 
 data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
 classes = load( '/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
-nClasses = max(classes);
+nClasses = max(classes)
 
-k = 5;
+tic;
+k = 2;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nClasses,k); % precision per class
 classRecalls = zeros(nClasses,k); % recall per class
@@ -33,9 +35,6 @@ foldIndices = crossvalind('Kfold',classes,k);
 for i=1:k
     
     %fprintf(strcat(['CV-iteration ', int2str(i), '\n']));
-
-    % votes for a text belonging to a class
-    %votes = zeros(size(data,1),nClasses);
     
     % find indices of data/classes that will be used for training/test
     testIndices = (foldIndices == i);
@@ -47,8 +46,13 @@ for i=1:k
     % TODO: We use "don't knows' in ava so this should be mentioned
     
     % Classification
-    %classified = classifyava(data,classes,testIndices,trainIndices);
-    classified = classifyova(data,classes,testIndices,trainIndices);
+    if strcmp(method,'AVA')
+        classified = classifyava(data,classes,testIndices,trainIndices);
+    elseif strcmp(method,'OVA')
+        classified = classifyova(data,classes,testIndices,trainIndices);
+    end
+    classified
+    testClasses
     
     % ----------- Performance measures -----------------
     

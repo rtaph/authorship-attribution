@@ -1,45 +1,36 @@
-import nltk
 import os
-from nltk.corpus import PlaintextCorpusReader
+from lxml import etree
 
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/blogs_utf8"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/small"
 corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/blogs"
 
 output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/data_formatted"
 
-FRAGMENTS = 100
-
-corpus = PlaintextCorpusReader(corpus_root, '.*')
-n_texts = len(corpus.fileids())
-
-for text in corpus.fileids():
-    
-    
-    wrd_tokens = corpus.words(text)
-    #lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
-    
-    #bla = len(wrd_tokens) / 100
-    #print bl
-    #print len(wrd_tokens) / float(bla)
-    
-    name = text.rpartition(".txt")[0]
-    author_id = text.partition(".")[0]
-    
-    i = 0
-    n_words = len(wrd_tokens)
-    print n_words
-    while n_words - i > FRAGMENTS*2:
-        
-        #print i
-        file_name = name + "_" + str(i) + "_" + author_id + ".txt"
-        f = open(os.path.join(output_folder, file_name), "w")
-        open
-        f.write(" ".join(wrd_tokens[i:i+FRAGMENTS]))
-        f.flush()
-        i = i + FRAGMENTS
-    
-    # Last file has more than FRAGMENTS words
-    file_name = name + "_" + str(i) + "_" + author_id + ".txt"
-    f = open(os.path.join(output_folder, file_name), "w")
-    f.write(" ".join(wrd_tokens[i:]))
-    f.flush()
-    #print i
+total_posts = 0
+for f in os.listdir(corpus_root):
+    p = os.path.join(corpus_root, f)
+    if os.path.isfile(p) and f.endswith(".xml"):
+        #print f
+        name = f.rpartition(".xml")[0]
+        author_id = f.partition(".")[0]
+        xml_file = open(p, 'r').read()
+        parser = etree.XMLParser(recover=True,remove_blank_text=True,encoding='latin1')
+        root = etree.fromstring(xml_file,parser)
+        post_no = 1
+        for child in root:
+            if child.tag == "post":                
+                if child.text:
+                    
+                    post = child.text.strip()
+                    folder = output_folder + str(author_id)[0]
+                    new_file = name + "_post" + str(post_no) + "_" + author_id + ".txt"
+                        
+                    nf = open(os.path.join(folder, new_file), "w")
+                    nf.write(post.encode("utf-8"))
+                    nf.flush()
+                    
+                    total_posts = total_posts + 1
+                    post_no = post_no + 1
+                    
+print total_posts

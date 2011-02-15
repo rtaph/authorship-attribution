@@ -26,7 +26,8 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set2"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set2"
 
 
 
@@ -140,6 +141,8 @@ for text in corpus.fileids():
     
     # TODO: can I reuse any word or character lists?
     wrd_tokens = corpus.words(text)
+    print text
+    #print len(wrd_tokens)
     lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
     
     

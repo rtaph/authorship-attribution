@@ -1,15 +1,13 @@
-function [] = aa_classify (runPython, method)
+function [] = aa_classify (runPython, method, kernel)
 
 %RUN_PYTHON = false;
 %METHOD = 'AVA'; % AVA or OVA
 
 if runPython
-    %params = '-c 3 300 -w 3 300';
-    %params = '-c 3 300 -w 3 300 -r /Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set2';
-    %params = '-f -c 3 200';
-    %params = '-w -c';
-    %params = '-f -c 3 200 -w 2 50 -r /Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set5';
-    params = '-c 3 200 -r /Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set2';
+    
+    corpus = '/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set10_10_2';
+    featureParams = '-c 3 150 -w 3 150';
+    params = strcat([featureParams, ' -r ', corpus]); 
 
     fprintf(strcat(['Calling Python script with arguments: ', params, '\n']));
     [status, pythonOut] = system(strcat(['python ../python/corpus_analysis.py ', params]));
@@ -27,7 +25,7 @@ classes = load( '/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
 nClasses = max(classes)
 
 tic;
-k = 2;
+k = 4;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nClasses,k); % precision per class
 classRecalls = zeros(nClasses,k); % recall per class
@@ -47,12 +45,12 @@ for i=1:k
     
     % Classification
     if strcmp(method,'AVA')
-        classified = classifyava(data,classes,testIndices,trainIndices);
+        classified = classifyava(data,classes,testIndices,trainIndices,kernel);
     elseif strcmp(method,'OVA')
-        classified = classifyova(data,classes,testIndices,trainIndices);
+        classified = classifyova(data,classes,testIndices,trainIndices,kernel);
     end
-    classified
-    testClasses
+    classified;
+    testClasses;
     
     % ----------- Performance measures -----------------
     

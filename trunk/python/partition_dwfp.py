@@ -1,22 +1,33 @@
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/almedad_all.txt"
+import os
 
-output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/almedad_all.txt"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/ansar1/ansar1_all.txt"
+
+output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/ansar1/all/"
+#output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/all/"
 
 f = open(corpus_root,'r')
-print f.readline()
+print f.readline() # header line
 
 for li in f:
     l = li.split('\t')
-    msg_id = l[0]
-    thread_id = l[1]
-    thread = l[2]
-    member_id = l[3]
-    member = l[4]
-    msg = l[5]
-    year = l[6]
-    month = l[7]
-    day = l[8]
-    date = l[9]
-    print date
+    k = len(l)
+    if k > 0:
+        msgid = l[0]
+        if k > 1:
+            tid = l[1]
+            if k > 3:
+                memid = l[3].replace(" ", "")
+                if len(memid) > 20:
+                    memid = memid[:20]
+                if len(l) > 5:
+                    msg = l[5]
+                    msg = msg.strip()
+                    if len(msg) > 0:
+                        filename = ".".join(["m"+memid,msgid,tid]) + "_" + memid + ".txt"
+                        print filename
+                        nf = open(os.path.join(output_folder,filename),"w")
+                        nf.write(msg)
+                        nf.flush()        
 
 f.close()

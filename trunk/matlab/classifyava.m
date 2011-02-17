@@ -1,4 +1,4 @@
-function classified = classifyava(data, classes, testIndices, trainIndices)
+function classified = classifyava(data, classes, testIndices, trainIndices, kernel)
 % SVM multiclass classification using All vs. All.
 %
 % Input
@@ -24,8 +24,8 @@ votes = zeros(size(data,1),nClasses);
 
 for c=1:nClasses
     for d=(c+1):nClasses
-        c
-        d
+        c;
+        d;
         cIndices = classes == c;
         dIndices = classes == d;
         cdIndices = cIndices + dIndices;
@@ -42,7 +42,8 @@ for c=1:nClasses
         % Train classifier
         %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function','rbf');
         %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function','quadratic');
-        svmStruct = svmtrain(trainData,trainClasses);
+        %kernel
+        svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel);
         
         % Test classifier
         cdClassified = svmclassify(svmStruct,testData);
@@ -56,7 +57,7 @@ for c=1:nClasses
         end
         %myVote
         votes(cdTestIndices,:) = votes(cdTestIndices,:) + myVote;
-        votes(testIndices,:)
+        %votes(testIndices,:)
         
     end
 end

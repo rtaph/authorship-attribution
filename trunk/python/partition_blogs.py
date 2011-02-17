@@ -25,6 +25,8 @@ for f in os.listdir(corpus_root):
             root = etree.fromstring(xml_file,parser)
             post_no = 1
             for child in root:
+            #for c in range(len(root)):
+                #child = root[c]
                 if child.tag == "post":
                     total_posts = total_posts + 1         
                     if child.text:
@@ -39,6 +41,11 @@ for f in os.listdir(corpus_root):
                             
                             nonempty_posts = nonempty_posts + 1
                             post_no = post_no + 1
+                        #else:
+                        #    print c, post
+                    #else:
+                    #    print c, child.text 
+                        
                     
 print "Total posts:", total_posts
 print "Non-empty posts:", nonempty_posts

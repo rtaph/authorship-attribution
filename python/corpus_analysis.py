@@ -109,9 +109,6 @@ feature_matrix = [[] for i in range(n_texts)]
 # List of classes, one for each text in corpus
 text_classes = []
 
-# Longest names must be first
-#possible_categories = {"hamilton": 1, "madison": 2, "jay": 3}
-
 
 ## CHAR N-GRAM VARIABLES 
 
@@ -141,7 +138,7 @@ for text in corpus.fileids():
     
     # TODO: can I reuse any word or character lists?
     wrd_tokens = corpus.words(text)
-    print text
+
     #print len(wrd_tokens)
     lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
     

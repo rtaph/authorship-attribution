@@ -22,7 +22,9 @@ for text in corpus.fileids():
     #print len(wrd_tokens) / float(bla)
     
     name = text.rpartition(".txt")[0]
-    author_id = text.partition(".")[0]
+    
+    # Author id is found in the name before the first dot
+    #author_id = text.partition(".")[0]
     
     i = 0
     n_words = len(wrd_tokens)
@@ -30,7 +32,7 @@ for text in corpus.fileids():
     while n_words - i > FRAGMENTS*2:
         
         #print i
-        file_name = name + "_" + str(i) + "_" + author_id + ".txt"
+        file_name = name + "_" + str(i) + ".txt"
         f = open(os.path.join(output_folder, file_name), "w")
         open
         f.write(" ".join(wrd_tokens[i:i+FRAGMENTS]))
@@ -38,7 +40,8 @@ for text in corpus.fileids():
         i = i + FRAGMENTS
     
     # Last file has more than FRAGMENTS words
-    file_name = name + "_" + str(i) + "_" + author_id + ".txt"
+    #file_name = name + "_" + str(i) + "_" + author_id + ".txt"
+    file_name = name + "_" + str(i) + ".txt"
     f = open(os.path.join(output_folder, file_name), "w")
     f.write(" ".join(wrd_tokens[i:]))
     f.flush()

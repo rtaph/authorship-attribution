@@ -27,7 +27,7 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set2"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set2"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set10_10_1"
 
 
 
@@ -65,7 +65,7 @@ while a < len(sys.argv):
             if a+2 < len(sys.argv) and not sys.argv[a+2].startswith("-"):
                 n_char_ngrams = int(sys.argv[a+2])
                 i = i + 1
-        print "Using the ", n_char_ngrams, "most frequent char n-grams of size", char_ngram_size 
+        print "Using the", n_char_ngrams, "most frequent char n-grams of size", char_ngram_size 
         
     # Function words
     elif arg == "-f":
@@ -81,7 +81,7 @@ while a < len(sys.argv):
             if a+2 < len(sys.argv) and not sys.argv[a+2].startswith("-"):
                 n_wrd_ngrams = int(sys.argv[a+2])
                 i = i + 1
-        print "Using the ", n_wrd_ngrams, "most frequent word n-grams of size", wrd_ngram_size 
+        print "Using the", n_wrd_ngrams, "most frequent word n-grams of size", wrd_ngram_size 
             
     # Corpus
     elif arg == "-r":
@@ -136,7 +136,6 @@ for text in corpus.fileids():
     
     #print text
     
-    # TODO: can I reuse any word or character lists?
     wrd_tokens = corpus.words(text)
 
     #print len(wrd_tokens)
@@ -178,6 +177,8 @@ for text in corpus.fileids():
     
     if wrd_ngrams:
         wrd_ng = ngrams(lower_wrds, wrd_ngram_size)
+        #if FreqDist(wrd_ng).keys().count(('bj', 'papa', 'bj')) > 0:
+        #    print text
         text_wrd_ngram_freqs.append(FreqDist(wrd_ng))
         all_wd_ngrams.extend(wrd_ng)
         #print FreqDist(wrd_ng).items()[10:]
@@ -206,6 +207,7 @@ if char_ngrams:
     
     # Frequency of all possible n-grams across corpus    
     all_char_ngrams_freqs = FreqDist(all_char_ngrams)
+    #print len(all_char_ngrams_freqs)
     tot_ngrams = min([n_char_ngrams, all_char_ngrams_freqs.B()])
     #print tot_ngrams
     
@@ -218,6 +220,7 @@ if char_ngrams:
         for r in range(tot_ngrams):
             #print r
             ngram = all_char_ngrams_freqs.keys()[r]
+            #print ngram
             freq = freqs.freq(ngram)
             feature_matrix[t].append(freq)
 
@@ -229,8 +232,12 @@ if wrd_ngrams:
     print "Attaching word n-grams to list of features"
     
     all_wrd_ngrams_freqs = FreqDist(all_wd_ngrams)
+    #print len(all_wrd_ngrams_freqs)
+    #print all_wrd_ngrams_freqs
+    
     tot_ngrams = min([n_wrd_ngrams, all_wrd_ngrams_freqs.B()])
     #print tot_ngrams
+    #print all_wrd_ngrams_freqs.keys()[:tot_ngrams]
     
     # Select word n-gram features
     for t in range(n_texts):
@@ -241,7 +248,10 @@ if wrd_ngrams:
         for r in range(tot_ngrams):
             #print r
             ngram = all_wrd_ngrams_freqs.keys()[r]
+            #print ngram
             freq = freqs.freq(ngram)
+            #if ngram == ('bj', 'papa', 'bj'):
+            #    print freq
             feature_matrix[t].append(freq)
 
 

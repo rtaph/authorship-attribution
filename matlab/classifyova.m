@@ -1,4 +1,4 @@
-function classified = classifyova(data, classes, testIndices, trainIndices)
+function classified = classifyova(data, classes, testIndices, trainIndices,kernel, kerneloption)
 % SVM multiclass classification using One vs. All.
 %
 % Input
@@ -22,8 +22,8 @@ classified = zeros(sum(testIndices),1);
 
 c = 1000;
 lambda = 1e-7;
-kerneloption= 2;
-kernel='gaussian';
+%kerneloption= 2;
+%kernel='gaussian';
 
 testData = data(testIndices,:);
 trainData = data(trainIndices,:);

@@ -24,7 +24,10 @@ for li in f:
                     msg = l[5]
                     msg = msg.strip()
                     if len(msg) > 0:
-                        filename = ".".join(["m"+memid,msgid,tid]) + "_" + memid + ".txt"
+                        
+                        
+                        #filename = ".".join(["m"+memid,msgid,tid]) + "_" + memid + ".txt"
+                        filename = ".".join(["m"+memid,msgid,tid]) + ".txt"
                         print filename
                         nf = open(os.path.join(output_folder,filename),"w")
                         nf.write(msg)

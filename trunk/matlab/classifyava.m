@@ -24,13 +24,12 @@ votes = zeros(size(data,1),nClasses);
 
 for c=1:nClasses
     for d=(c+1):nClasses
-        c;
-        d;
+        fprintf(strcat(['c,d: ', int2str(c), ',', int2str(d), '\n']));
         cIndices = classes == c;
         dIndices = classes == d;
         cdIndices = cIndices + dIndices;
         
-        cdTestIndices = logical(testIndices .* cdIndices);
+        cdTestIndices = logical(testIndices .* cdIndices)
         cdTrainIndices = logical(trainIndices .* cdIndices);
         
         testData = data(cdTestIndices,:);
@@ -43,10 +42,16 @@ for c=1:nClasses
         %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function','rbf');
         %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function','quadratic');
         %kernel
-        svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel);
+        % TODO: mlp sometimes throw exception
         
+        try
+            svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel);
+        catch
+            %fprintf('Error\n');
+            continue
+        end
         % Test classifier
-        cdClassified = svmclassify(svmStruct,testData);
+        cdClassified = svmclassify(svmStruct,testData)
         %pause
         
         % Place vote for one of the two classes, c and d
@@ -59,18 +64,8 @@ for c=1:nClasses
         votes(cdTestIndices,:) = votes(cdTestIndices,:) + myVote;
         %votes(testIndices,:)
         
+        
     end
 end
 
-% Evaluate vote. The highest vote to achieve is nClasses-1, as this
-% is the number of pairs each class participates in.
-votes = votes(testIndices,:);
-classified = zeros(sum(testIndices),1);
-for v=1:size(votes,1)
-    [high, class] = max(votes(v,:));
-    
-    % Make sure we only have _one_ winner
-    if sum(ismember(votes(v,:),high)) == 1
-        classified(v) = class;
-    end
-end
+classified = evalvote(votes, testIndices);

@@ -16,6 +16,7 @@ for f in os.listdir(corpus_root):
     p = os.path.join(corpus_root, f)
     if os.path.isfile(p) and f.endswith(".xml"):
         name = f.rpartition(".xml")[0]
+        # Author id is found in the name before the first dot
         author_id = f.partition(".")[0]
         
         if len(ONLY_AUTHORSID_PREFIX) == 0 or str(author_id)[0] == ONLY_AUTHORSID_PREFIX:
@@ -33,7 +34,8 @@ for f in os.listdir(corpus_root):
                         post = child.text.strip()
                         if len(post) > 0:
                             folder = output_folder + str(author_id)[0]
-                            new_file = name + "_post" + str(post_no) + "_" + author_id + ".txt"
+                            #new_file = name + "_post" + str(post_no) + "_" + author_id + ".txt"
+                            new_file = name + "_post" + str(post_no) + ".txt"
                                 
                             nf = open(os.path.join(folder, new_file), "w")
                             nf.write(post.encode("utf-8"))

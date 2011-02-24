@@ -2,11 +2,10 @@ import os
 from lxml import etree
 from nltk.corpus import PlaintextCorpusReader
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set30_10_1"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_10_4_quat"
+output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_10_4_eight"    
 
-output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set30_10_1_half"    
-
-ONLY_FIRST_HALF = True
+ONLY_FIRST_HALF = False
 
 for f in os.listdir(corpus_root):
     p = os.path.join(corpus_root, f)
@@ -20,16 +19,25 @@ for f in os.listdir(corpus_root):
         wrds = len(txt.split())
         chars = len(txt)
         
-        
         if wrds > 1:
-            i = chars / 2
-            while txt[i].isalnum():
-                i = i + 1
-                
-            #print i
+            i = 0        
+            if wrds == 2:
+                i = txt.find(" ")
+            else:
+                i = chars / 2
+                try: # try going forward to find a space where to split..
+                    while not txt[i].isspace():
+                        i = i + 1
+                except IndexError, e: # .. it didn't work so we try to go backwards
+                    i = chars / 2
+                    while not txt[i].isspace():
+                        i = i - 1
+                    
+            #if f == "9289.male.23.Marketing.Taurus_post5_9289_1.txt":
+            #    print i
             first_half = txt[:i]
             second_half = txt[i:]
-        
+            
             new_name1 = name + "_1.txt"
             nf1 = open(os.path.join(output_folder, new_name1), "w")
             nf1.write(first_half)

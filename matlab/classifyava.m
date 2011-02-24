@@ -1,4 +1,4 @@
-function classified = classifyava(data, classes, testIndices, trainIndices, kernel)
+function classified = classifyava(data, classes, testIndices, trainIndices, kernel, realClasses)
 % SVM multiclass classification using All vs. All.
 %
 % Input
@@ -24,12 +24,12 @@ votes = zeros(size(data,1),nClasses);
 
 for c=1:nClasses
     for d=(c+1):nClasses
-        fprintf(strcat(['c,d: ', int2str(c), ',', int2str(d), '\n']));
+        %fprintf(strcat(['c,d: ', int2str(c), ',', int2str(d), '\n']));
         cIndices = classes == c;
         dIndices = classes == d;
         cdIndices = cIndices + dIndices;
         
-        cdTestIndices = logical(testIndices .* cdIndices)
+        cdTestIndices = logical(testIndices .* cdIndices);
         cdTrainIndices = logical(trainIndices .* cdIndices);
         
         testData = data(cdTestIndices,:);
@@ -51,7 +51,7 @@ for c=1:nClasses
             continue
         end
         % Test classifier
-        cdClassified = svmclassify(svmStruct,testData)
+        cdClassified = svmclassify(svmStruct,testData);
         %pause
         
         % Place vote for one of the two classes, c and d
@@ -67,5 +67,11 @@ for c=1:nClasses
         
     end
 end
+%votes
 
-classified = evalvote(votes, testIndices);
+
+if nargin < 6
+    classified = evalvote(votes, testIndices);
+else
+    classified = evalvote(votes, testIndices, realClasses);
+end

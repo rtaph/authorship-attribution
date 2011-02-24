@@ -25,9 +25,9 @@ FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
 CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 
 # folder with corpus
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/set2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_quat"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set10_10_1"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_10_4_first_eight"
 
 
 
@@ -134,22 +134,27 @@ if function_words:
 
 for text in corpus.fileids():
     
-    #print text
+    print text
     
     wrd_tokens = corpus.words(text)
+    
+    empty = len(corpus.raw(text)) == 0 
 
-    #print len(wrd_tokens)
-    lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
+    if not empty:
+        #print len(wrd_tokens)
+        lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
     
     
     # Find category in filename
     #cat_start = text.rfind("_") + 1
-    found_category = (text.rpartition("_")[2]).partition(".")[0]
-    #found_category = ""
+    #found_category = (text.rpartition("_")[2]).partition(".")[0]
+    found_category = text.partition(".")[0]
+    #print found_category
     #for k in possible_categories.keys():
     #    if text.count(k) > 0:
     #        found_category = possible_categories[k]
     #        break # only one category per file
+    
     text_classes.append(found_category)
     
     #print ""
@@ -159,29 +164,38 @@ for text in corpus.fileids():
     #### FUNCTION WORDS ####
     
     if function_words:
-        my_func_wrds = [w for w in lower_wrds if func_wrds.count(w) > 0]
-        text_funcwrd_freqs.append(FreqDist(my_func_wrds))
+        if not empty:
+            my_func_wrds = [w for w in lower_wrds if func_wrds.count(w) > 0]
+            text_funcwrd_freqs.append(FreqDist(my_func_wrds))
+        else:
+            text_funcwrd_freqs.append(FreqDist())
     
     
     ######## CHAR N-GRAMS #############
     
     if char_ngrams:
-        text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-        char_ngrams = ngrams(text_str, char_ngram_size)
-        text_char_ngrams_freqs.append(FreqDist(char_ngrams))
-        all_char_ngrams.extend(char_ngrams)
-        #print FreqDist(char_ngrams).items()[10:]
+        if not empty:
+            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
+            char_ngrams = ngrams(text_str, char_ngram_size)
+            text_char_ngrams_freqs.append(FreqDist(char_ngrams))
+            all_char_ngrams.extend(char_ngrams)
+            #print FreqDist(char_ngrams).items()[10:]
+        else:
+            text_char_ngrams_freqs.append(FreqDist())
     
     
     ######## WORD N-GRAMS #############
     
     if wrd_ngrams:
-        wrd_ng = ngrams(lower_wrds, wrd_ngram_size)
-        #if FreqDist(wrd_ng).keys().count(('bj', 'papa', 'bj')) > 0:
-        #    print text
-        text_wrd_ngram_freqs.append(FreqDist(wrd_ng))
-        all_wd_ngrams.extend(wrd_ng)
-        #print FreqDist(wrd_ng).items()[10:]
+        if not empty:
+            wrd_ng = ngrams(lower_wrds, wrd_ngram_size)
+            #if FreqDist(wrd_ng).keys().count(('bj', 'papa', 'bj')) > 0:
+            #    print text
+            text_wrd_ngram_freqs.append(FreqDist(wrd_ng))
+            all_wd_ngrams.extend(wrd_ng)
+            #print FreqDist(wrd_ng).items()[10:]
+        else:
+            text_wrd_ngram_freqs.append(FreqDist())
     
 
 ##### SAVE FREQS OF FUNCTION WORDS AS FEATURES
@@ -213,6 +227,7 @@ if char_ngrams:
     
     # Select char n-gram features
     for t in range(n_texts):
+        print 'Text', t
         freqs = text_char_ngrams_freqs[t]
         
         # Step through X most frequent n-grams across corpus, the feature is the
@@ -241,6 +256,7 @@ if wrd_ngrams:
     
     # Select word n-gram features
     for t in range(n_texts):
+        print 'Text', t
         freqs = text_wrd_ngram_freqs[t]
         
         # Step through X most frequent n-grams across corpus, the feature is the
@@ -268,6 +284,8 @@ ff.flush()
 
 
 #### PUT CLASSES IN A FILE ####
+
+# TODO: Output real classes + subclasses to real_cat
 
 print "Outputting classes to", CATEGORY_FILE
 distinct_classes = list(set(text_classes))

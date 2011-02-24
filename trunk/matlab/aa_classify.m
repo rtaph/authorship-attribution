@@ -1,15 +1,19 @@
-function avgAccuracy = aa_classify (runPython, method, kernel, kerneloption, corpus)
+function avgAccuracy = aa_classify (runPython, voteReal, method, kernel, kerneloption, corpus)
+% runPython: Run the python script prior to classification
+% method: AvA or OvA
+% kernel: For AvA: . For OvA:
+% kerneloption: ?
+% corpus: Path to text-corpus
+% voteReal: Whether to vote for real (over-)classes in AvA
 
-%RUN_PYTHON = false;
-%METHOD = 'AVA'; % AVA or OVA
 
-if nargin < 4
+if nargin < 5
     kerneloption = 2;
 end
 
 if runPython
     
-    if nargin < 5
+    if nargin < 6
         corpus = '/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_10_2/';
     end
     featureParams = '-c 3 150 -w 3 150';
@@ -27,8 +31,18 @@ if runPython
 end
 
 data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
-classes = load( '/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt')
-nClasses = max(classes)
+classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
+
+nClasses = max(classes);
+%nTexts = size(data,1)
+%nClasses = 3
+
+if strcmp(method,'AVA') && voteReal
+    realClasses = load('/Users/epb/Documents/uni/kandidat/speciale/code/real_cat.txt');
+    nClasses = size(realClasses,1);
+end
+%realClasses = [1:4;5:8;9:12];
+
 
 tic;
 k = 4;
@@ -45,21 +59,47 @@ for i=1:k
     % find indices of data/classes that will be used for training/test
     testIndices = (foldIndices == i);
     trainIndices = ~testIndices;
-    testClasses = classes(testIndices);
+    
     
     % TODO: We use "don't knows' in ava so this should be mentioned
     
+    
+    
     % Classification
     if strcmp(method,'AVA')
-        classified = classifyava(data,classes,testIndices,trainIndices,kernel);
+        if voteReal
+            classified = classifyava(data,classes,testIndices,trainIndices,kernel,realClasses);
+        else
+            classified = classifyava(data,classes,testIndices,trainIndices,kernel);
+        end
     elseif strcmp(method,'OVA')
         classified = classifyova(data,classes,testIndices,trainIndices,kernel, kerneloption);
     end
-    classified;
-    testClasses;
+    %classified = ceil(classified/4)
+    
+    %classified
+    %testClasses = ceil(testClasses/4);
+    %nClasses = 3
+    
     
     % ----------- Performance measures -----------------
     
+    % Determine test-classes (possibly some real classes)
+    testClasses = classes(testIndices);
+    if strcmp(method,'AVA') && voteReal
+        tc = zeros(size(testClasses));
+        for n=1:size(testClasses,1)
+            for c=1:nClasses
+                subClasses = realClasses(c,:);
+                if sum(ismember(subClasses,testClasses(n))) == 1
+                    tc(n) = c;
+                end
+            end
+        end
+        testClasses = tc;
+    end
+    testClasses;
+            
     [a, cp, cr, cf] = performance(classified, testClasses,nClasses);
     accuracies(i) = a;
     classPrecisions(:,i) = cp;
@@ -72,7 +112,7 @@ end
 
 % Catch NaNs in precisions and recalls if necessary
 avgAccuracy = mean(accuracies);
-accuracies
+accuracies;
 classPrecisions;
 avgClassPrecisions = meanwithnan(classPrecisions);
 classRecalls;

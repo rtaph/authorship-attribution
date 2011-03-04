@@ -10,7 +10,8 @@ a(2) = aa_classify(false,false,'OVA','poly',3);
 a(3) = aa_classify(false,false,'OVA','poly',3);
 a(4) = aa_classify(false,false,'OVA','poly',3);
 a(5) = aa_classify(false,false,'OVA','poly',3);
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 fprintf('OVA, polyhomog\n');
 a = [];
@@ -19,7 +20,8 @@ a(2) = aa_classify(false,false,'OVA','polyhomog',3);
 a(3) = aa_classify(false,false,'OVA','polyhomog',3);
 a(4) = aa_classify(false,false,'OVA','polyhomog',3);
 a(5) = aa_classify(false,false,'OVA','polyhomog',3);
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 fprintf('OVA, gaussian\n');
 a = [];
@@ -28,7 +30,8 @@ a(2) = aa_classify(false,false,'OVA','gaussian',2);
 a(3) = aa_classify(false,false,'OVA','gaussian',2);
 a(4) = aa_classify(false,false,'OVA','gaussian',2);
 a(5) = aa_classify(false,false,'OVA','gaussian',2);
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 fprintf('OVA, htrbf\n');
 a = [];
@@ -37,7 +40,8 @@ a(2) = aa_classify(false,false,'OVA','htrbf',[1,-1]);
 a(3) = aa_classify(false,false,'OVA','htrbf',[1,-1]);
 a(4) = aa_classify(false,false,'OVA','htrbf',[1,-1]);
 a(5) = aa_classify(false,false,'OVA','htrbf',[1,-1]);
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 % fprintf('OVA, wavelet\n');
 % a = [];
@@ -46,4 +50,5 @@ mean(a)
 % a(3) = aa_classify(false,false,'OVA','wavelet');
 % a(4) = aa_classify(false,false,'OVA','wavelet');
 % a(5) = aa_classify(false,false,'OVA','wavelet');
-% mean(a)
+% avg = mean(a)
+% stDev = std(a)

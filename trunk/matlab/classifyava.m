@@ -32,6 +32,9 @@ for c=1:nClasses
         cdTestIndices = logical(testIndices .* cdIndices);
         cdTrainIndices = logical(trainIndices .* cdIndices);
         
+        %fprintf(strcat(['Training on indexes ', int2str(find(cdTrainIndices')), '\n']));
+        %fprintf(strcat(['Testing  on indexes ', int2str(find(cdTestIndices')), '\n']));
+        
         testData = data(cdTestIndices,:);
         trainData = data(cdTrainIndices,:);
         
@@ -52,6 +55,7 @@ for c=1:nClasses
         end
         % Test classifier
         cdClassified = svmclassify(svmStruct,testData);
+        %fprintf(strcat(['                    ',int2str(cdClassified'),'\n']));
         %pause
         
         % Place vote for one of the two classes, c and d

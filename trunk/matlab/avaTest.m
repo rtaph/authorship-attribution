@@ -2,7 +2,9 @@ fprintf('\n\n******************* NEW AVA TEST *********************\n');
 fprintf('******************* NEW AVA TEST *********************\n');
 fprintf('******************* NEW AVA TEST *********************\n\n');
 
-voteReal = false;
+
+% REMEMBER TO SET THIS PARAMETER!!
+voteReal = true;
 
 fprintf('AVA, linear\n');
 a = [];
@@ -12,7 +14,8 @@ a(2) = aa_classify(false,voteReal,'AVA','linear');
 a(3) = aa_classify(false,voteReal,'AVA','linear');
 a(4) = aa_classify(false,voteReal,'AVA','linear');
 a(5) = aa_classify(false,voteReal,'AVA','linear');
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 fprintf('AVA, quadratic\n');
 a = [];
@@ -21,7 +24,8 @@ a(2) = aa_classify(false,voteReal,'AVA','quadratic');
 a(3) = aa_classify(false,voteReal,'AVA','quadratic');
 a(4) = aa_classify(false,voteReal,'AVA','quadratic');
 a(5) = aa_classify(false,voteReal,'AVA','quadratic');
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 fprintf('AVA, polynomial\n');
 a = [];
@@ -30,7 +34,8 @@ a(2) = aa_classify(false,voteReal,'AVA','polynomial');
 a(3) = aa_classify(false,voteReal,'AVA','polynomial');
 a(4) = aa_classify(false,voteReal,'AVA','polynomial');
 a(5) = aa_classify(false,voteReal,'AVA','polynomial');
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 fprintf('AVA, rbf\n');
 a = [];
@@ -39,7 +44,8 @@ a(2) = aa_classify(false,voteReal,'AVA','rbf');
 a(3) = aa_classify(false,voteReal,'AVA','rbf');
 a(4) = aa_classify(false,voteReal,'AVA','rbf');
 a(5) = aa_classify(false,voteReal,'AVA','rbf');
-mean(a)
+avg = mean(a)
+stDev = std(a)
 
 fprintf('AVA, mlp\n');
 a = [];
@@ -48,4 +54,5 @@ a(2) = aa_classify(false,voteReal,'AVA','mlp');
 a(3) = aa_classify(false,voteReal,'AVA','mlp');
 a(4) = aa_classify(false,voteReal,'AVA','mlp');
 a(5) = aa_classify(false,voteReal,'AVA','mlp');
-mean(a)
+avg = mean(a)
+stDev = std(a)

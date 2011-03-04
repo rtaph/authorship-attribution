@@ -33,11 +33,12 @@ end
 data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
 classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
 
-nClasses = max(classes);
+nClasses = max(classes)
 %nTexts = size(data,1)
 %nClasses = 3
 
 if strcmp(method,'AVA') && voteReal
+    fprintf('Vote-win goes to parent\n');
     realClasses = load('/Users/epb/Documents/uni/kandidat/speciale/code/real_cat.txt');
     nClasses = size(realClasses,1);
 end

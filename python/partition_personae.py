@@ -8,7 +8,7 @@ output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_
 
 FRAGMENTS = 100
 
-corpus = PlaintextCorpusReader(corpus_root, '.*')
+corpus = PlaintextCorpusReader(corpus_root, '.*', encoding="utf-8")
 n_texts = len(corpus.fileids())
 
 for text in corpus.fileids():
@@ -34,8 +34,8 @@ for text in corpus.fileids():
         #print i
         file_name = name + "_" + str(i) + ".txt"
         f = open(os.path.join(output_folder, file_name), "w")
-        open
-        f.write(" ".join(wrd_tokens[i:i+FRAGMENTS]))
+        content = " ".join(wrd_tokens[i:i+FRAGMENTS])
+        f.write(content.encode("utf-8"))
         f.flush()
         i = i + FRAGMENTS
     
@@ -43,6 +43,7 @@ for text in corpus.fileids():
     #file_name = name + "_" + str(i) + "_" + author_id + ".txt"
     file_name = name + "_" + str(i) + ".txt"
     f = open(os.path.join(output_folder, file_name), "w")
-    f.write(" ".join(wrd_tokens[i:]))
+    content = " ".join(wrd_tokens[i:])
+    f.write(content.encode("utf-8"))
     f.flush()
     #print i

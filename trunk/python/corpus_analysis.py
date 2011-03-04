@@ -23,7 +23,7 @@ FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zl
 # output files
 FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
 CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
-STATUS_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out_state.txt"
+#STATUS_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out_state.txt"
 
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
@@ -32,8 +32,8 @@ corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_00
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_5_multi10"
 
 
-st_file = open(STATUS_FILE,"w")
-st_file.write(str(time.strftime("%X %x")) + "\n")
+#st_file = open(STATUS_FILE,"w")
+#st_file.write(str(time.strftime("%X %x")) + "\n")
 
 def load_wrds(dir, cmt="//"):
     '''
@@ -68,13 +68,13 @@ while a < len(sys.argv):
                 n_char_ngrams = int(sys.argv[a+2])
                 i = i + 1
         print "Using the", n_char_ngrams, "most frequent char n-grams of size", char_ngram_size
-        st_file.write("Using the " + str(n_char_ngrams) + " most frequent char n-grams of size " + str(char_ngram_size) + "\n")
+        #st_file.write("Using the " + str(n_char_ngrams) + " most frequent char n-grams of size " + str(char_ngram_size) + "\n")
         
     # Function words
     elif arg == "-f":
         function_words = True
         print "Using function words"
-        st_file.write("Using function words\n")
+        #st_file.write("Using function words\n")
         
     # Word n-grams
     elif arg == "-w":
@@ -86,7 +86,7 @@ while a < len(sys.argv):
                 n_wrd_ngrams = int(sys.argv[a+2])
                 i = i + 1
         print "Using the", n_wrd_ngrams, "most frequent word n-grams of size", wrd_ngram_size 
-        st_file.write("Using the " + str(n_wrd_ngrams) +  " most frequent word n-grams of size " + str(wrd_ngram_size) + "\n")
+        #st_file.write("Using the " + str(n_wrd_ngrams) +  " most frequent word n-grams of size " + str(wrd_ngram_size) + "\n")
         
     # Corpus
     elif arg == "-r":
@@ -97,7 +97,7 @@ while a < len(sys.argv):
     a = a + i
     
 print "Corpus is", corpus_root
-st_file.write("Corpus is " + corpus_root + "\n")
+#st_file.write("Corpus is " + corpus_root + "\n")
 
 start = time.time()
             
@@ -143,7 +143,7 @@ for text in corpus.fileids():
     if not text.endswith(".txt"):
         continue
     print text
-    st_file.write(text + "\n")
+    #st_file.write(text + "\n")
     
     wrd_tokens = corpus.words(text)
     
@@ -227,7 +227,7 @@ if function_words:
 if char_ngrams:
         
     print "Attaching char n-grams to list of features"
-    st_file.write("Attaching char n-grams to list of features\n")
+    #st_file.write("Attaching char n-grams to list of features\n")
     
     # Frequency of all possible n-grams across corpus    
     all_char_ngrams_freqs = FreqDist(all_char_ngrams)
@@ -238,7 +238,7 @@ if char_ngrams:
     # Select char n-gram features
     for t in range(n_texts):
         print 'Text', t
-        st_file.write("Text: " + str(t) + "\n")
+        #st_file.write("Text: " + str(t) + "\n")
         freqs = text_char_ngrams_freqs[t]
         
         # Step through X most frequent n-grams across corpus, the feature is the
@@ -256,7 +256,7 @@ if char_ngrams:
 if wrd_ngrams:
     
     print "Attaching word n-grams to list of features"
-    st_file.write("Attaching word n-grams to list of features\n")
+    #st_file.write("Attaching word n-grams to list of features\n")
     
     all_wrd_ngrams_freqs = FreqDist(all_wd_ngrams)
     #print len(all_wrd_ngrams_freqs)
@@ -269,7 +269,7 @@ if wrd_ngrams:
     # Select word n-gram features
     for t in range(n_texts):
         print 'Text', t
-        st_file.write("Text: " + str(t) + "\n")
+        #st_file.write("Text: " + str(t) + "\n")
         freqs = text_wrd_ngram_freqs[t]
         
         # Step through X most frequent n-grams across corpus, the feature is the
@@ -289,7 +289,7 @@ if wrd_ngrams:
 #### PUT FEATURES IN A FILE ####
 
 print "Outputting features to", FEATURE_FILE
-st_file.write("Outputting features to " + FEATURE_FILE + "\n")
+#st_file.write("Outputting features to " + FEATURE_FILE + "\n")
 ff = open(FEATURE_FILE,'w')
 for feat in feature_matrix:
     strlist = [str(i) for i in feat]
@@ -302,7 +302,7 @@ ff.flush()
 # TODO: Output real classes + subclasses to real_cat
 
 print "Outputting classes to", CATEGORY_FILE
-st_file.write("Outputting classes to " + CATEGORY_FILE + "\n")
+#st_file.write("Outputting classes to " + CATEGORY_FILE + "\n")
 distinct_classes = list(set(text_classes))
 #print distinct_classes
 #int_classes = range(1,len(text_classes))
@@ -318,7 +318,7 @@ end = time.time()
 n_texts = len(corpus.fileids())
 n_features = len(feature_matrix[0])
 print "Total time elapsed analysing {0} texts: {1} sec. No. of features: {2}".format(n_texts,end-start,n_features)
-st_file.write("Total time elapsed analysing {0} texts: {1} sec. No. of features: {2}".format(n_texts,end-start,n_features) + "\n")
+#st_file.write("Total time elapsed analysing {0} texts: {1} sec. No. of features: {2}".format(n_texts,end-start,n_features) + "\n")
 
-st_file.write(str(time.strftime("%X %x")) + "\n")
-st_file.flush()
+#st_file.write(str(time.strftime("%X %x")) + "\n")
+#st_file.flush()

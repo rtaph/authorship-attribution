@@ -43,9 +43,21 @@ a(5) = aa_classify(false,false,'OVA','htrbf',[1,-1]);
 avg = mean(a)
 stDev = std(a)
 
-% fprintf('OVA, wavelet\n');
-% a = [];
-% a(1) = aa_classify(false,false,'OVA','wavelet');
+% NOT WORKING AS INPUT DESCRIPTIONS NOT GIVEN!
+
+%fprintf('OVA, wavelet\n');
+%a = [];
+%a(1) = aa_classify(false,false,'OVA','wavelet');
+% a(2) = aa_classify(false,false,'OVA','wavelet');
+% a(3) = aa_classify(false,false,'OVA','wavelet');
+% a(4) = aa_classify(false,false,'OVA','wavelet');
+% a(5) = aa_classify(false,false,'OVA','wavelet');
+% avg = mean(a)
+% stDev = std(a)
+
+%fprintf('OVA, frame\n');
+%a = [];
+%a(1) = aa_classify(false,false,'OVA','frame','sin');
 % a(2) = aa_classify(false,false,'OVA','wavelet');
 % a(3) = aa_classify(false,false,'OVA','wavelet');
 % a(4) = aa_classify(false,false,'OVA','wavelet');

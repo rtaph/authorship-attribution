@@ -116,10 +116,13 @@ avgAccuracy = mean(accuracies);
 accuracies;
 classPrecisions;
 avgClassPrecisions = meanwithnan(classPrecisions);
+avgPrecision = meanwithnan(avgClassPrecisions')
 classRecalls;
 avgClassRecalls = meanwithnan(classRecalls);
+avgRecall = meanwithnan(avgClassRecalls')
 classF1s;
 avgClassF1s = meanwithnan(classF1s);
+avgF1 = meanwithnan(avgClassF1s')
 
 toc;
 

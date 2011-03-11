@@ -9,33 +9,8 @@ function classified = evalvote (votes, testIndices, subClasses)
 votes = votes(testIndices,:);
 classified = zeros(sum(testIndices),1);
 for v=1:size(votes,1)
-    
-    
-    %if nargin > 2 % sum of votes for subclasses
-    
-%     if nargin > 2 % The subclass with highest vote gives the win to real class
-%         
-%         sums = zeros(1,size(subClasses,1));
-%         for n=1:size(subClasses,1)
-%             
-%             n;
-%             s = 0;
-%             sc = subClasses(n,:);
-%             for r=1:size(sc,2)
-%                 s = s + votes(v,sc(r));
-%             end
-%             sums(n) = s;
-%         end
-%         
-%         %votes(v,:)
-%         voteRow = sums;
-%         
-%         
-%     else % normal vote
         
-        voteRow = votes(v,:);
-        
-%     end
+    voteRow = votes(v,:);
     
     [high, class] = max(voteRow);
     

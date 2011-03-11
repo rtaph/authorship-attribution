@@ -29,14 +29,25 @@ for c=1:nClasses
         dIndices = classes == d;
         cdIndices = cIndices + dIndices;
         
+        
         cdTestIndices = logical(testIndices .* cdIndices);
         cdTrainIndices = logical(trainIndices .* cdIndices);
+        
+        %if c == 13 && d == 15
+        %    cdTestIndices(1:30,:)
+        %    cdTrainIndices(1:30,:)
+        %end
         
         %fprintf(strcat(['Training on indexes ', int2str(find(cdTrainIndices')), '\n']));
         %fprintf(strcat(['Testing  on indexes ', int2str(find(cdTestIndices')), '\n']));
         
         testData = data(cdTestIndices,:);
         trainData = data(cdTrainIndices,:);
+        
+        %if c == 13 && d == 15
+        %    testData(:,1:10)
+        %    trainData(:,1:10)
+        %end
         
         %testClasses = classes(cdTestIndices);
         trainClasses = classes(cdTrainIndices);
@@ -57,6 +68,9 @@ for c=1:nClasses
         cdClassified = svmclassify(svmStruct,testData);
         %fprintf(strcat(['                    ',int2str(cdClassified'),'\n']));
         %pause
+        %if c == 13 && d == 15
+        %    cdClassified
+        %end
         
         % Place vote for one of the two classes, c and d
         nClassified = size(cdClassified,1);
@@ -71,7 +85,7 @@ for c=1:nClasses
         
     end
 end
-%votes
+%votes(1:30,:)
 
 
 if nargin < 6

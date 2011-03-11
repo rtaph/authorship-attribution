@@ -30,8 +30,13 @@ if runPython
     %classes = load(char(files(2)));
 end
 
-data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
-classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
+%data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
+%classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
+data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/a1_060_10.out.txt');
+classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/a1_060_10.cat.txt');
+
+%classes(1:30,:)
+%data(1:30,1:10)
 
 nClasses = max(classes)
 %nTexts = size(data,1)
@@ -59,6 +64,9 @@ for i=1:k
     
     % find indices of data/classes that will be used for training/test
     testIndices = (foldIndices == i);
+    %if i == 1
+    %    testIndices(1:30,:)
+    %end
     trainIndices = ~testIndices;
     
     
@@ -99,7 +107,9 @@ for i=1:k
         end
         testClasses = tc;
     end
-    testClasses;
+    %classified(1:20,:)
+    %testClasses(1:20,:)
+    
             
     [a, cp, cr, cf] = performance(classified, testClasses,nClasses);
     accuracies(i) = a;
@@ -109,16 +119,29 @@ for i=1:k
 
 end
 
-% TODO: Alarm if some precision/recall is low
+% Alarm
+alarmTrigger = 0.6;
 
 % Catch NaNs in precisions and recalls if necessary
 avgAccuracy = mean(accuracies);
 accuracies;
 classPrecisions;
 avgClassPrecisions = meanwithnan(classPrecisions);
+
+% Alarm if low precision found
+if sum(isnan(avgClassPrecisions)) > 0 || sum(avgClassPrecisions<=alarmTrigger) > 0
+    fprintf('!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!');
+    avgClassPrecisions
+end
 avgPrecision = meanwithnan(avgClassPrecisions')
 classRecalls;
 avgClassRecalls = meanwithnan(classRecalls);
+
+% Alarm if low recall found
+if sum(isnan(avgClassRecalls)) > 0 || sum(avgClassRecalls<=alarmTrigger) > 0
+    fprintf('!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!');
+    avgClassRecalls
+end
 avgRecall = meanwithnan(avgClassRecalls')
 classF1s;
 avgClassF1s = meanwithnan(classF1s);

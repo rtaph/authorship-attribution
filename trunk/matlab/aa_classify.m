@@ -32,8 +32,10 @@ end
 
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
-data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/a1_060_10.out.txt');
-classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/a1_060_10.cat.txt');
+%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.out.txt');
+%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.cat.txt');
+data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_1.out.txt');
+classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_1.cat.txt');
 
 %classes(1:30,:)
 %data(1:30,1:10)
@@ -64,29 +66,34 @@ for i=1:k
     
     % find indices of data/classes that will be used for training/test
     testIndices = (foldIndices == i);
+    trainIndices = ~testIndices;
     %if i == 1
     %    testIndices(1:30,:)
     %end
-    trainIndices = ~testIndices;
     
+    %classes
+    trainClasses = classes(trainIndices,:);
+    trainData = data(trainIndices,:);
+    testData = data(testIndices,:);
+    %pause
     
     % TODO: We use "don't knows' in ava so this should be mentioned
-    
-    
-    
     % Classification
     if strcmp(method,'AVA')
         if voteReal
-            classified = classifyava(data,classes,testIndices,trainIndices,kernel,realClasses);
+            classified = classifyava(trainData,trainClasses,testData,nClasses,kernel,realClasses);
+            %classified = classifyava(data,classes,testData,trainIndices,kernel,realClasses);
         else
-            classified = classifyava(data,classes,testIndices,trainIndices,kernel);
+            classified = classifyava(trainData,trainClasses,testData,nClasses,kernel);
         end
     elseif strcmp(method,'OVA')
-        classified = classifyova(data,classes,testIndices,trainIndices,kernel, kerneloption);
+        %classified = classifyova(data,classes,testData,trainIndices,kernel, kerneloption);
+        classified = classifyova(trainClasses,trainData,testData,nClasses,kernel, kerneloption);
     end
     %classified = ceil(classified/4)
     
-    %classified
+    
+    
     %testClasses = ceil(testClasses/4);
     %nClasses = 3
     
@@ -107,8 +114,8 @@ for i=1:k
         end
         testClasses = tc;
     end
-    %classified(1:20,:)
-    %testClasses(1:20,:)
+    %classified
+    %testClasses
     
             
     [a, cp, cr, cf] = performance(classified, testClasses,nClasses);
@@ -120,7 +127,7 @@ for i=1:k
 end
 
 % Alarm
-alarmTrigger = 0.6;
+alarmTrigger = 0.3;
 
 % Catch NaNs in precisions and recalls if necessary
 avgAccuracy = mean(accuracies);

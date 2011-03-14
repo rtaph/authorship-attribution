@@ -1,4 +1,5 @@
-function classified = classifyava(data, classes, testIndices, trainIndices, kernel, realClasses)
+%function classified = classifyava(data, classes, testData, trainIndices, kernel, realClasses)
+function classified = classifyava(trainData, trainClasses, testData, nClasses, kernel, realClasses)
 % SVM multiclass classification using All vs. All.
 %
 % Input
@@ -7,8 +8,7 @@ function classified = classifyava(data, classes, testIndices, trainIndices, kern
 % m columns represent the features of each text.
 % classes: A vector (n x 1) that determines which of q classes (integers
 % starting at 1) each text of the data set belongs to.
-% testIndices: A vector (n x 1) of logical indices of the classes used for
-% test.
+% testData: 
 % trainIndices: A vector (n x 1) of logical indices of the classes used for
 % training.
 %
@@ -17,21 +17,32 @@ function classified = classifyava(data, classes, testIndices, trainIndices, kern
 % classified: A vector of length sum(testIndices), with a the class of each
 % text in the test-set.
 
-nClasses = max(classes);
 
-% votes for a text belonging to a class
-votes = zeros(size(data,1),nClasses);
+% testIndices: A vector (n x 1) of logical indices of the classes used for
+% test.
+
+%nClasses = max(classes);
+
+% votes for a text of the test set belonging to a class
+%votes = zeros(size(data,1),nClasses);
+votes = zeros(size(testData,1),nClasses);
+
+%testIndices(1:4,:)
+%testClasses = classes(testIndices);
 
 for c=1:nClasses
     for d=(c+1):nClasses
         %fprintf(strcat(['c,d: ', int2str(c), ',', int2str(d), '\n']));
-        cIndices = classes == c;
-        dIndices = classes == d;
-        cdIndices = cIndices + dIndices;
+        %cIndices = classes == c;
+        %dIndices = classes == d;
+        cIndices = trainClasses == c;
+        dIndices = trainClasses == d;
+        cdIndices = logical(cIndices + dIndices);
+        %pause
         
         
-        cdTestIndices = logical(testIndices .* cdIndices);
-        cdTrainIndices = logical(trainIndices .* cdIndices);
+        %cdTestIndices = logical(testIndices .* cdIndices);
+        %cdTrainIndices = logical(trainIndices .* cdIndices);
         
         %if c == 13 && d == 15
         %    cdTestIndices(1:30,:)
@@ -41,16 +52,21 @@ for c=1:nClasses
         %fprintf(strcat(['Training on indexes ', int2str(find(cdTrainIndices')), '\n']));
         %fprintf(strcat(['Testing  on indexes ', int2str(find(cdTestIndices')), '\n']));
         
-        testData = data(cdTestIndices,:);
-        trainData = data(cdTrainIndices,:);
-        
+        %testData = data(cdTestIndices,:);
+        %testData = data(testIndices,:);
+        %trainData = data(cdTrainIndices,:);
+        cdTrainData = trainData(cdIndices,:);
+        cdTrainClasses = trainClasses(cdIndices,:);
+        %size(cdTrainData)
+        %size(cdTrainClasses)
+        %pause
         %if c == 13 && d == 15
         %    testData(:,1:10)
         %    trainData(:,1:10)
         %end
         
         %testClasses = classes(cdTestIndices);
-        trainClasses = classes(cdTrainIndices);
+        %trainClasses = classes(cdTrainIndices);
         
         % Train classifier
         %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function','rbf');
@@ -59,37 +75,55 @@ for c=1:nClasses
         % TODO: mlp sometimes throw exception
         
         try
-            svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel);
-        catch
-            %fprintf('Error\n');
+            options = optimset('maxiter',1000);
+            %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel,'quadprog_opts',options);
+            svmStruct = svmtrain(cdTrainData,cdTrainClasses,'Kernel_Function',kernel,'quadprog_opts',options);
+            %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel,'quadprog_opts',options,'showplot',true);
+            %pause;
+        catch exception
+            fprintf('Exception!!\n');
+            %throw(exception);
             continue
         end
         % Test classifier
+        %cdClassified = svmclassify(svmStruct,testData,'showplot',true);
         cdClassified = svmclassify(svmStruct,testData);
         %fprintf(strcat(['                    ',int2str(cdClassified'),'\n']));
         %pause
-        %if c == 13 && d == 15
-        %    cdClassified
+        %if c == 1
+        %cdClassified
         %end
         
-        % Place vote for one of the two classes, c and d
-        nClassified = size(cdClassified,1);
-        myVote = zeros(nClassified,nClasses);
-        for l=1:nClassified
-            myVote(l,cdClassified(l)) = 1;
+        % Place vote for one of the two classes, c or d
+        %nClassified = size(cdClassified,1);
+        %myVote = zeros(nClassified,nClasses);
+        %myVote = zeros(size(votes));
+        %for l=1:nClassified
+        for l=1:size(testData,1)
+            %myVote(l,cdClassified(l)) = 1;
+            votes(l,cdClassified(l)) = votes(l,cdClassified(l)) + 1;
         end
         %myVote
-        votes(cdTestIndices,:) = votes(cdTestIndices,:) + myVote;
+        %votes(cdTestIndices,:) = votes(cdTestIndices,:) + myVote;
+        %votes(testIndices,:) = votes(testIndices,:) + myVote;
         %votes(testIndices,:)
-        
-        
+        %votes = votes + myVote
+        %votes
+        %if c == 1
+        %votes(1:4,:)
+        %end
+        %pause
     end
 end
 %votes(1:30,:)
+%votes(testIndices,:)
+%pause
 
-
+%fprintf('Voting...');
 if nargin < 6
-    classified = evalvote(votes, testIndices);
+    %classified = evalvote(votes, testIndices);
+    classified = evalvote(votes);
 else
-    classified = evalvote(votes, testIndices, realClasses);
+    %classified = evalvote(votes, testIndices, realClasses);
+    classified = evalvote(votes, realClasses);
 end

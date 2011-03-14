@@ -1,3 +1,7 @@
+'''
+Copy a number of non-emtpy texts from one folder to another.
+'''
+
 import nltk
 import os
 from math import sqrt
@@ -5,11 +9,11 @@ from nltk.corpus import PlaintextCorpusReader
 import random
 import shutil
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/data_formatted6"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/data_formatted5"
 
-output = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_100_10"
+output = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_200_10"
 
-NAUTHORS = 10
+NAUTHORS = 50
 a = 0
 authors = {}
 NTEXTS = 10
@@ -29,9 +33,10 @@ while a < NAUTHORS:
         
         author = txt.partition(".")[0]
         #print "Found author:", author
+        content = open(p,"r").read()
         
         #if authors.count(author) == 0:
-        if not authors.has_key(author):
+        if not authors.has_key(author) and len(content) > 0:
             #print "Author is new"
             #authors.append(author)
             
@@ -51,10 +56,12 @@ while a < NAUTHORS:
                     #print "Next author:", next_author
                     if author == next_author:
                         #print "Found new text by", author
-                        #p = os.path.join(corpus_root, next_txt)
+                        p = os.path.join(corpus_root, next_txt)
                         #texts.append(next_txt)
-                        my_texts.append(next_txt)
-                        #t = t + 1
+                        content = open(p,"r").read()
+                        if len(content) > 0:
+                            my_texts.append(next_txt)
+                            #t = t + 1
                     elif y < x:
                         break # no more texts by this author
                     else:

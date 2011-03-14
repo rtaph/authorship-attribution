@@ -2,8 +2,10 @@ import os
 from lxml import etree
 from nltk.corpus import PlaintextCorpusReader
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_10_4_quat"
-output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_10_4_eight"    
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a2_4_8"
+#output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a2_4_16"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_32"
+output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"    
 
 ONLY_FIRST_HALF = False
 

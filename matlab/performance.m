@@ -4,11 +4,10 @@ correctClassified = classified == testClasses;
 
 % accuracy
 accuracy = (sum(correctClassified))/size(classified,1);
-%accuracies(i) = a;
 
-% precision and recall
-classPrecisions = zeros(nClasses,1); % precision per class
-classRecalls = zeros(nClasses,1); % recall per class
+% precision and recall per class
+classPrecisions = zeros(nClasses,1);
+classRecalls = zeros(nClasses,1);
 
 for c=1:nClasses
     totalClassifiedForC = classified == c;
@@ -16,12 +15,10 @@ for c=1:nClasses
     correctClassifiedForC = correctClassified(totalClassifiedForC);
     
     precision = NaN;
+    % We cannot calculate precision if there are no instances classified
+    % to the given class
     if sum(totalClassifiedForC) > 0
         precision = sum(correctClassifiedForC) / sum(totalClassifiedForC);
-    %elseif sum(actualClassesForC) == 0
-        % We cannot calculate precision if there are no instances of a
-        % given class in the test set and none was assigned.
-    %    precision = NaN;
     end
     classPrecisions(c) = precision;
     
@@ -35,6 +32,13 @@ for c=1:nClasses
     
 end
 
-classF1s = (2*classPrecisions.*classRecalls) ./ (classPrecisions + classRecalls);
-%classF1s = zeros(nClasses,1);
-%classF1s = (2*classPrecisions*classRecalls) / (classPrecisions + classRecalls);
+% We need to calculate F1 in a loop because precision and recall may be
+% both 0 for a class and this should give F1== not F1=NaN
+classF1s = zeros(nClasses,1);
+for c=1:nClasses
+    p = classPrecisions(c);
+    r = classRecalls(c);
+    if ~(p == 0 && r == 0)
+        classF1s(c) = (2*p*r) / (p+r);
+    end
+end

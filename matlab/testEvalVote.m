@@ -3,21 +3,24 @@ initTestSuite;
 
 function test1
 v = [0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0];
-t = logical([1;0;1;0;0;0;0;0;0]);
-c = evalvote(v, t);
-assertEqual(c,[0;0]);
+%t = logical([1;0;1;0;0;0;0;0;0]);
+%c = evalvote(v, t);
+c = evalvote(v);
+%assertEqual(c,[0;0]);
+assertEqual(c,[0;0;0;0;0;0;0;0;0]);
 
 function test2
 v = [1,0,0;0,0,0;0,1,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0];
-t = logical([1;0;1;0;0;0;0;0;0]);
-c = evalvote(v, t);
-assertEqual(c,[1;2]);
+%t = logical([1;0;1;0;0;0;0;0;0]);
+c = evalvote(v);
+assertEqual(c,[1;0;2;0;0;0;0;0;0]);
 
 function test3
 v = [0,0,0;1,2,0;0,0,0;0,5,0;0,0,5;0,7,0;0,2,0;0,0,0;0,0,0];
-t = logical([1;0;1;0;0;0;0;0;0]);
-c = evalvote(v, t);
-assertEqual(c,[0;0]);
+%t = logical([1;0;1;0;0;0;0;0;0]);
+c = evalvote(v);
+%assertEqual(c,[0;0]);
+assertEqual(c,[0;2;0;2;3;2;2;0;0]);
 
 function test4
 v = [0,0,2;0,0,0;1,0,1;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0;0,0,0];

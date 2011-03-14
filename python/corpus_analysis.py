@@ -23,13 +23,17 @@ FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zl
 # output files
 FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
 CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
+#FEATURE_FILE = "/home/epb/Documents/code/out.txt"
+#CATEGORY_FILE = "/home/epb/Documents/code/cat.txt"
 #STATUS_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out_state.txt"
 
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_5_multi10"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a2_4_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set30_10_2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/a1_3_40_10"
 
 
 #st_file = open(STATUS_FILE,"w")
@@ -105,7 +109,7 @@ MAX = 5
 i = 0
 
 # Load corpus
-corpus = PlaintextCorpusReader(corpus_root, '.*txt')
+corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
 n_texts = len(corpus.fileids())
 
 # Matrix containing features; a list for each text
@@ -231,7 +235,10 @@ if char_ngrams:
     
     # Frequency of all possible n-grams across corpus    
     all_char_ngrams_freqs = FreqDist(all_char_ngrams)
+    #print all_char_ngrams_freqs.items()[:10]
+    #print all_char_ngrams_freqs.keys()[:10]
     #print len(all_char_ngrams_freqs)
+    # we can't look for more n-grams than we have
     tot_ngrams = min([n_char_ngrams, all_char_ngrams_freqs.B()])
     #print tot_ngrams
     
@@ -240,6 +247,7 @@ if char_ngrams:
         print 'Text', t
         #st_file.write("Text: " + str(t) + "\n")
         freqs = text_char_ngrams_freqs[t]
+        #print freqs
         
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text
@@ -247,7 +255,9 @@ if char_ngrams:
             #print r
             ngram = all_char_ngrams_freqs.keys()[r]
             #print ngram
+            #print ngram
             freq = freqs.freq(ngram)
+            #print ngram, freq
             feature_matrix[t].append(freq)
 
 
@@ -261,7 +271,9 @@ if wrd_ngrams:
     all_wrd_ngrams_freqs = FreqDist(all_wd_ngrams)
     #print len(all_wrd_ngrams_freqs)
     #print all_wrd_ngrams_freqs
+    #print all_wrd_ngrams_freqs.items()[:10]
     
+    # we can't look for more n-grams than we have
     tot_ngrams = min([n_wrd_ngrams, all_wrd_ngrams_freqs.B()])
     #print tot_ngrams
     #print all_wrd_ngrams_freqs.keys()[:tot_ngrams]

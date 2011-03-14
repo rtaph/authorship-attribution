@@ -1,4 +1,4 @@
-function classified = classifyova(data, classes, testIndices, trainIndices,kernel, kerneloption)
+function classified = classifyova(trainClasses, trainData, testData, nClasses, kernel, kerneloption)
 % SVM multiclass classification using One vs. All.
 %
 % Input
@@ -16,18 +16,19 @@ function classified = classifyova(data, classes, testIndices, trainIndices,kerne
 %testIndices
 %trainIndices
 
-nClasses = max(classes);
+%nClasses = max(classes);
 
-classified = zeros(sum(testIndices),1);
+%classified = zeros(sum(testIndices),1);
+classified = zeros(size(testData,1),1);
 
 c = 1000;
 lambda = 1e-7;
 %kerneloption= 2;
 %kernel='gaussian';
 
-testData = data(testIndices,:);
-trainData = data(trainIndices,:);
-trainClasses = classes(trainIndices);
+%testData = data(testIndices,:);
+%trainData = data(trainIndices,:);
+%trainClasses = classes(trainIndices);
 [xsup,w,b,nbsv] = svmmulticlassoneagainstall(trainData,trainClasses,nClasses,c,lambda,kernel,kerneloption,false);
 
 for t=1:size(testData,1)

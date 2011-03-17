@@ -5,7 +5,6 @@ function classified = evalvote (votes, subClasses)
 % real class and the s values in a row determine which sub-classes this
 % real class contains. If the subClasses argument is given, the sub-class
 % that wins the vote, will give its victory to its parent.
-
 classified = zeros(size(votes,1),1);
 for v=1:size(votes,1)
         

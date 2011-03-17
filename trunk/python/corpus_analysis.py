@@ -31,9 +31,9 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a2_4_10"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set30_10_2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_6"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/a1_3_40_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/a1_3_40_multi"
 
 
 #st_file = open(STATUS_FILE,"w")

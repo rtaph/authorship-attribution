@@ -6,6 +6,7 @@ function avgAccuracy = aa_classify (runPython, voteReal, method, kernel, kernelo
 % corpus: Path to text-corpus
 % voteReal: Whether to vote for real (over-)classes in AvA
 
+autoCluster = false;
 
 if nargin < 5
     kerneloption = 2;
@@ -31,33 +32,73 @@ if runPython
 end
 
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
+%classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt')
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.cat.txt');
-data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_1.out.txt');
-classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_1.cat.txt');
+data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_2.out.txt');
+classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_2.cat.txt');
+%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.out.txt');
+%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.cat.txt');
 
+%data = data(:,1:3)
 %classes(1:30,:)
 %data(1:30,1:10)
+%y = pdist(data);
+%z = linkage(y);
+%[H,T] = dendrogram(z,'colorthreshold','default');
+%pause;
+
+%plot(data(classes==1,1),data(classes==1,2),'r.','MarkerSize',12)
+%hold on
+%plot(data(classes==2,1),data(classes==2,2),'b.','MarkerSize',12)
+%plot(ctrs(:,1),ctrs(:,2),'kx',...
+%    'MarkerSize',12,'LineWidth',2)
+%plot(ctrs(:,1),ctrs(:,2),'ko',...
+%    'MarkerSize',12,'LineWidth',2)
+%legend('Cluster 1','Cluster 2','Centroids',...
+%      'Location','NW')
+%pause
 
 nClasses = max(classes)
+nRealClasses = nClasses;
 %nTexts = size(data,1)
 %nClasses = 3
+
+% TODO: Clean-up in vote for real and autoCluster
 
 if strcmp(method,'AVA') && voteReal
     fprintf('Vote-win goes to parent\n');
     realClasses = load('/Users/epb/Documents/uni/kandidat/speciale/code/real_cat.txt');
-    nClasses = size(realClasses,1);
+    %nClasses = size(realClasses,1);
+    nRealClasses = size(realClasses,1);
 end
 %realClasses = [1:4;5:8;9:12];
+
+if strcmp(method,'AVA') && autoCluster
+    fprintf('Using autoclustering..\n');
+    nClusters = 4;
+    classes
+    [classes, realClasses] = kmeanscluster(classes,nClasses,data,nClusters)
+    nRealClasses = nClasses
+    %realClasses = zeros(nRealClasses,nClusters);
+    %for i=1:nRealClasses
+    %    for j=1:nClusters
+    %        realClasses(i,j) = (2*i)+j-2;
+    %    end
+    %end
+    %realClasses
+    nClasses = nClasses*nClusters
+    %pause
+end
+    
 
 
 tic;
 k = 4;
 accuracies = zeros(1,k);
-classPrecisions = zeros(nClasses,k); % precision per class
-classRecalls = zeros(nClasses,k); % recall per class
-classF1s = zeros(nClasses,k); % F1-measure per class
+classPrecisions = zeros(nRealClasses,k); % precision per class
+classRecalls = zeros(nRealClasses,k); % recall per class
+classF1s = zeros(nRealClasses,k); % F1-measure per class
 
 foldIndices = crossvalind('Kfold',classes,k);
 for i=1:k
@@ -80,12 +121,14 @@ for i=1:k
     % TODO: We use "don't knows' in ava so this should be mentioned
     % Classification
     if strcmp(method,'AVA')
-        if voteReal
+        if voteReal || autoCluster
             classified = classifyava(trainData,trainClasses,testData,nClasses,kernel,realClasses);
             %classified = classifyava(data,classes,testData,trainIndices,kernel,realClasses);
         else
             classified = classifyava(trainData,trainClasses,testData,nClasses,kernel);
         end
+    elseif strcmp(method,'OVAC')
+        classified = customova(trainClasses,trainData,testData,nClasses,kernel, kerneloption);
     elseif strcmp(method,'OVA')
         %classified = classifyova(data,classes,testData,trainIndices,kernel, kerneloption);
         classified = classifyova(trainClasses,trainData,testData,nClasses,kernel, kerneloption);
@@ -102,10 +145,10 @@ for i=1:k
     
     % Determine test-classes (possibly some real classes)
     testClasses = classes(testIndices);
-    if strcmp(method,'AVA') && voteReal
+    if strcmp(method,'AVA') && (voteReal || autoCluster)
         tc = zeros(size(testClasses));
         for n=1:size(testClasses,1)
-            for c=1:nClasses
+            for c=1:nRealClasses
                 subClasses = realClasses(c,:);
                 if sum(ismember(subClasses,testClasses(n))) == 1
                     tc(n) = c;
@@ -118,7 +161,7 @@ for i=1:k
     %testClasses
     
             
-    [a, cp, cr, cf] = performance(classified, testClasses,nClasses);
+    [a, cp, cr, cf] = performance(classified, testClasses,nRealClasses);
     accuracies(i) = a;
     classPrecisions(:,i) = cp;
     classRecalls(:,i) = cr;

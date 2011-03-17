@@ -4,7 +4,7 @@ fprintf('******************* NEW AVA TEST *********************\n\n');
 
 
 % REMEMBER TO SET THIS PARAMETER!!
-voteReal = false;
+voteReal = true;
 
 fprintf('AVA, linear\n');
 a = [];

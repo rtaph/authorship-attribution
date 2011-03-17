@@ -74,14 +74,22 @@ for c=1:nClasses
         %kernel
         % TODO: mlp sometimes throw exception
         
+        
         try
             options = optimset('maxiter',1000);
             %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel,'quadprog_opts',options);
             svmStruct = svmtrain(cdTrainData,cdTrainClasses,'Kernel_Function',kernel,'quadprog_opts',options);
             %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel,'quadprog_opts',options,'showplot',true);
             %pause;
+            %svmStruct.KernelFunction
+            %svmStruct.SupportVectorIndices
+            %bsxfun(@svmStruct.KernelFunction, cdTrainData(1,:),testData(1,:))
+            %pause
+            
         catch exception
             fprintf('Exception!!\n');
+            %cdTrainData
+            %cdTrainClasses
             %throw(exception);
             continue
         end

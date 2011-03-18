@@ -80,4 +80,4 @@ tc = [1;1;1;2;2;2;2;2;2];
 assertEqual(a,2.0/9);
 assertEqual(cp,[2.0/6;0;0]);
 assertEqual(cr,[2.0/3;0;NaN]);
-assertEqual(cf,[(2*(2.0/6)*(2.0/3))/((2.0/6)+(2.0/3));NaN;NaN]);
+assertEqual(cf,[(2*(2.0/6)*(2.0/3))/((2.0/6)+(2.0/3));0;NaN]);

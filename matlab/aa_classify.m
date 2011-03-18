@@ -35,8 +35,8 @@ end
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt')
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.cat.txt');
-data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_2.out.txt');
-classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_2.cat.txt');
+data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_1.out.txt');
+classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set30_10_1.cat.txt');
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.cat.txt');
 

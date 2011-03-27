@@ -5,7 +5,7 @@ from nltk.probability import FreqDist
 import sys
 import os
 import time
-#from nltk.book import *
+import fextract_helper
 
 #text4.dispersion_plot(["citizens", "democracy", "freedom", "duties", "America"])
 
@@ -20,6 +20,7 @@ n_char_ngrams = 10
 function_words = False
 FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zlch06"
 
+
 # output files
 FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
 CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
@@ -30,31 +31,14 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a2_4_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_050_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_6"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/a1_3_40_multi"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/a1_3_40_multi"
 
 
 #st_file = open(STATUS_FILE,"w")
 #st_file.write(str(time.strftime("%X %x")) + "\n")
-
-def load_wrds(dir, cmt="//"):
-    '''
-    Load a list of a words from some text files found in a given dir.
-    Each line is considered a word if it is not a comment.
-    @param dir: Where the files are found
-    @param cmt: Comment-line indicator
-    '''
-    wrds = []
-    for e in os.listdir(dir):
-        if os.path.isfile(os.path.join(dir, e)):
-            f = open(os.path.join(dir,e))
-            for l in f:
-                if not l.startswith(cmt):
-                    wrds.append(l.rstrip())
-            f.close()
-    return wrds
 
 # Get options from command line
 a = 0
@@ -104,9 +88,6 @@ print "Corpus is", corpus_root
 #st_file.write("Corpus is " + corpus_root + "\n")
 
 start = time.time()
-            
-MAX = 5
-i = 0
 
 # Load corpus
 corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
@@ -117,220 +98,29 @@ feature_matrix = [[] for i in range(n_texts)]
 #print feature_matrix
 
 # List of classes, one for each text in corpus
-text_classes = []
-
-
-## CHAR N-GRAM VARIABLES 
+text_classes = fextract_helper.find_classes(corpus.fileids())
 
 if char_ngrams:
-    all_char_ngrams = [] # All n-grams found in entire corpus
-    text_char_ngrams_freqs = [] # The frequency of char n-grams found in each text   
-
-## WORD N-GRAM VARIABLES
-
+    a, t = fextract_helper.char_ngram_stats(corpus.fileids(), corpus, n_char_ngrams, char_ngram_size)
+    feat_charngram = fextract_helper.create_char_ngrams(n_char_ngrams, a, t)
 if wrd_ngrams:
-    all_wd_ngrams = []
-    text_wrd_ngram_freqs = []
-
-## FUNCTION WORD VARIABLES
-
+    a, t = fextract_helper.wrd_ngram_stats(corpus.fileids(), corpus, n_char_ngrams, char_ngram_size)
+    feat_wrdgram = fextract_helper.create_wrd_ngrams(n_wrd_ngrams, a, t)
 if function_words:
-    func_wrds = load_wrds(FUNC_FOLDER)
-    #print len(func_wrds)
-    text_funcwrd_freqs = []
-
-
-######## ANALYZE TEXTS ########
-
-for text in corpus.fileids():
-    
-    if not text.endswith(".txt"):
-        continue
-    print text
-    #st_file.write(text + "\n")
-    
-    wrd_tokens = corpus.words(text)
-    
-    empty = len(corpus.raw(text)) == 0 
-
-    if not empty:
-        #print len(wrd_tokens)
-        lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
-    
-    
-    # Find category in filename
-    #cat_start = text.rfind("_") + 1
-    #found_category = (text.rpartition("_")[2]).partition(".")[0]
-    found_category = text.partition(".")[0]
-    #print found_category
-    #for k in possible_categories.keys():
-    #    if text.count(k) > 0:
-    #        found_category = possible_categories[k]
-    #        break # only one category per file
-    
-    text_classes.append(found_category)
-    
-    #print ""
-    #print text, len(corpus.words(text))
-    
-    
-    #### FUNCTION WORDS ####
-    
-    if function_words:
-        if not empty:
-            my_func_wrds = [w for w in lower_wrds if func_wrds.count(w) > 0]
-            text_funcwrd_freqs.append(FreqDist(my_func_wrds))
-        else:
-            text_funcwrd_freqs.append(FreqDist())
-    
-    
-    ######## CHAR N-GRAMS #############
-    
+    func_wds, text_func_wrds = fextract_helper.extract_fws(corpus.fileids(), corpus, FUNC_FOLDER)
+    feat_funcwrds = fextract_helper.create_fw_features(func_wds, text_func_wrds)
+for f in range(len(feature_matrix)):
     if char_ngrams:
-        if not empty:
-            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-            char_ngrams = ngrams(text_str, char_ngram_size)
-            text_char_ngrams_freqs.append(FreqDist(char_ngrams))
-            all_char_ngrams.extend(char_ngrams)
-            #print FreqDist(char_ngrams).items()[10:]
-        else:
-            text_char_ngrams_freqs.append(FreqDist())
-    
-    
-    ######## WORD N-GRAMS #############
-    
+        feature_matrix[f].extend(feat_charngram[f])
     if wrd_ngrams:
-        if not empty:
-            wrd_ng = ngrams(lower_wrds, wrd_ngram_size)
-            #if FreqDist(wrd_ng).keys().count(('bj', 'papa', 'bj')) > 0:
-            #    print text
-            text_wrd_ngram_freqs.append(FreqDist(wrd_ng))
-            all_wd_ngrams.extend(wrd_ng)
-            #print FreqDist(wrd_ng).items()[10:]
-        else:
-            text_wrd_ngram_freqs.append(FreqDist())
-    
+        feature_matrix[f].extend(feat_wrdgram[f])
+    if function_words:
+        feature_matrix[f].extend(feat_funcwrds[f])
 
-##### SAVE FREQS OF FUNCTION WORDS AS FEATURES
-
-if function_words:
-    
-    print "Attaching function words to list of features"
-    
-    for t in range(n_texts):
-        freqs = text_funcwrd_freqs[t]
-        
-        for f in func_wrds:
-            freq = freqs.freq(f)
-            feature_matrix[t].append(freq)
-    
-
-    
-##### SAVE CHAR N-GRAMS AS FEATURES
-
-if char_ngrams:
-        
-    print "Attaching char n-grams to list of features"
-    #st_file.write("Attaching char n-grams to list of features\n")
-    
-    # Frequency of all possible n-grams across corpus    
-    all_char_ngrams_freqs = FreqDist(all_char_ngrams)
-    #print all_char_ngrams_freqs.items()[:10]
-    #print all_char_ngrams_freqs.keys()[:10]
-    #print len(all_char_ngrams_freqs)
-    # we can't look for more n-grams than we have
-    tot_ngrams = min([n_char_ngrams, all_char_ngrams_freqs.B()])
-    #print tot_ngrams
-    
-    # Select char n-gram features
-    for t in range(n_texts):
-        print 'Text', t
-        #st_file.write("Text: " + str(t) + "\n")
-        freqs = text_char_ngrams_freqs[t]
-        #print freqs
-        
-        # Step through X most frequent n-grams across corpus, the feature is the
-        # relative frequency for each n-gram in each text
-        for r in range(tot_ngrams):
-            #print r
-            ngram = all_char_ngrams_freqs.keys()[r]
-            #print ngram
-            #print ngram
-            freq = freqs.freq(ngram)
-            #print ngram, freq
-            feature_matrix[t].append(freq)
-
-
-##### SAVE WORD N-GRAMS AS FEATURES
-
-if wrd_ngrams:
-    
-    print "Attaching word n-grams to list of features"
-    #st_file.write("Attaching word n-grams to list of features\n")
-    
-    all_wrd_ngrams_freqs = FreqDist(all_wd_ngrams)
-    #print len(all_wrd_ngrams_freqs)
-    #print all_wrd_ngrams_freqs
-    #print all_wrd_ngrams_freqs.items()[:10]
-    
-    # we can't look for more n-grams than we have
-    tot_ngrams = min([n_wrd_ngrams, all_wrd_ngrams_freqs.B()])
-    #print tot_ngrams
-    #print all_wrd_ngrams_freqs.keys()[:tot_ngrams]
-    
-    # Select word n-gram features
-    for t in range(n_texts):
-        print 'Text', t
-        #st_file.write("Text: " + str(t) + "\n")
-        freqs = text_wrd_ngram_freqs[t]
-        
-        # Step through X most frequent n-grams across corpus, the feature is the
-        # relative frequency for each n-gram in each text
-        for r in range(tot_ngrams):
-            #print r
-            ngram = all_wrd_ngrams_freqs.keys()[r]
-            #print ngram
-            freq = freqs.freq(ngram)
-            #if ngram == ('bj', 'papa', 'bj'):
-            #    print freq
-            feature_matrix[t].append(freq)
-
-
-
-
-#### PUT FEATURES IN A FILE ####
-
-print "Outputting features to", FEATURE_FILE
-#st_file.write("Outputting features to " + FEATURE_FILE + "\n")
-ff = open(FEATURE_FILE,'w')
-for feat in feature_matrix:
-    strlist = [str(i) for i in feat]
-    ff.write(" ".join(strlist) + "\n")
-ff.flush()
-
-
-#### PUT CLASSES IN A FILE ####
-
-# TODO: Output real classes + subclasses to real_cat
-
-print "Outputting classes to", CATEGORY_FILE
-#st_file.write("Outputting classes to " + CATEGORY_FILE + "\n")
-distinct_classes = list(set(text_classes))
-#print distinct_classes
-#int_classes = range(1,len(text_classes))
-cf = open(CATEGORY_FILE,'w')
-for c in text_classes:
-    i = distinct_classes.index(c) + 1
-    #cf.write(str(c) + "\n")
-    cf.write(str(i) + "\n")
-cf.flush()
+fextract_helper.save_features(FEATURE_FILE, feature_matrix, CATEGORY_FILE, text_classes)
 
 # Stop timer and display results
 end = time.time()
 n_texts = len(corpus.fileids())
 n_features = len(feature_matrix[0])
 print "Total time elapsed analysing {0} texts: {1} sec. No. of features: {2}".format(n_texts,end-start,n_features)
-#st_file.write("Total time elapsed analysing {0} texts: {1} sec. No. of features: {2}".format(n_texts,end-start,n_features) + "\n")
-
-#st_file.write(str(time.strftime("%X %x")) + "\n")
-#st_file.flush()

@@ -2,32 +2,43 @@ function classified = customova(trainClasses, trainData, testData, nClasses, ker
 
 c = 1;
 
-trainClasses
+trainClasses;
 allIndices = trainClasses ~= c;
 ovaClasses = allIndices + 1 % c will be class 1, all will be class 2
 
-size(ovaClasses)
+size(ovaClasses);
 options = optimset('maxiter',1000);
-svmStruct = svmtrain(trainData,ovaClasses,'Kernel_Function',kernel,'quadprog_opts',options)
+svmStruct = svmtrain(trainData,ovaClasses,'Kernel_Function',kernel,'quadprog_opts',options);
 %svmStruct.KernelFunction
 %svmStruct.SupportVectorIndices
 %bsxfun(@svmStruct.KernelFunction, cdTrainData(1,:),testData(1,:))
 %pause
 %svmStruct.Alpha
 
+classified = svmclassify(svmStruct,testData)
+
+for i=1:size(testData,1)
+    %i
+    t = testData(i,:);
+    [out, f] = svmdecision(t,svmStruct);
+    %if out > 0
+        out
+    %end
+end
+
 
 % sum K(xi,x)*(alphai.*yi)
 % firstPart = sum(bsxfun(@svmStruct.KernelFunction, testData,...
 % svmStruct.SupportVectors(1,:)).*(svmStruct.Alpha(1)*-1), 2;
-bla = bsxfun(@svmStruct.KernelFunction, testData(1,:), trainData(1,:))
-blu = svmStruct.Alpha
+%bla = bsxfun(@svmStruct.KernelFunction, testData(1,:), trainData(1,:))
+%blu = svmStruct.Alpha
 
 
 
 % sum K(xi,s)*(alphai.*yi)
 
 % Calculate distance
-dNeg = firstPartNeg - 0.5*secondPart
+%dNeg = firstPartNeg - 0.5*secondPart
 
 % for c=1:nClasses
 %     for d=(c+1):nClasses

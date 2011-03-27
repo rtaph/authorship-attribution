@@ -7,8 +7,8 @@ import unicodedata
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/data_formatted"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/temp4"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/data_formatted"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_200_10"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 
 corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding="UTF-8")
 n_texts = len(corpus.fileids())

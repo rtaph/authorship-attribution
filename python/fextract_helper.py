@@ -60,7 +60,7 @@ def char_ngram_stats(texts, corpus, n_char_ngrams, char_ngram_size):
     return all_char_ngrams, text_char_ngrams
 
 def create_char_ngrams(n_char_ngrams, all_char_ngrams, text_char_ngrams):
-    print "Attaching char n-grams to list of features"
+    print os.getpid(), ": Attaching char n-grams to list of features"
     n_texts = len(text_char_ngrams)
     #print os.getpid(), n_texts
     feature_matrix = [[] for i in range(n_texts)]
@@ -69,18 +69,23 @@ def create_char_ngrams(n_char_ngrams, all_char_ngrams, text_char_ngrams):
     all_char_ngrams_freqs = FreqDist(all_char_ngrams)
     # we can't look for more n-grams than we have
     tot_ngrams = min([n_char_ngrams, all_char_ngrams_freqs.B()])
-        
+    
     # Select char n-gram features
     for t in range(n_texts):
-        print 'Text', t
+        #print 'Text', t
         #freqs = text_char_ngrams[t]
         freqs = FreqDist(text_char_ngrams[t])
+        print freqs.items()[:5]
+        # TODO: Correct to calculate delta here from text-only?
+        delta = freqs.Nr(1) / float(freqs.Nr(1) + 2*freqs.Nr(2))
+        #print delta
             
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text
         for r in range(tot_ngrams):
             ngram = all_char_ngrams_freqs.keys()[r]
             freq = freqs.freq(ngram)
+            print freq
             feature_matrix[t].append(freq)
     
     return feature_matrix
@@ -114,7 +119,7 @@ def wrd_ngram_stats(texts, corpus, n_wrd_ngrams, wrd_ngram_size):
     return all_wd_ngrams, text_wrd_ngrams
 
 def create_wrd_ngrams(n_wrd_ngrams, all_wd_ngrams, text_wrd_ngrams):
-    print "Attaching word n-grams to list of features"
+    print os.getpid(), ": Attaching word n-grams to list of features"
     n_texts = len(text_wrd_ngrams)
     feature_matrix = [[] for i in range(n_texts)]
     all_wrd_ngrams_freqs = FreqDist(all_wd_ngrams)
@@ -124,7 +129,7 @@ def create_wrd_ngrams(n_wrd_ngrams, all_wd_ngrams, text_wrd_ngrams):
         
     # Select word n-gram features
     for t in range(n_texts):
-        print 'Text', t
+        #print 'Text', t
         #freqs = text_wrd_ngrams[t]
         freqs = FreqDist(text_wrd_ngrams[t])
             

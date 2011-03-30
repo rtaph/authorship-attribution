@@ -19,7 +19,8 @@ FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
 CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zlch06"
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_050_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+#corpus_root = "nobackup/blogs/a1_050_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/a1"
 
 corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
@@ -51,7 +52,7 @@ def fw_create_worker(text_fws):
     return fextract_helper.create_fw_features(func_wrds, text_fws)
     
 def splitup_tasks(all_tasks, workers, tasks_per_worker):
-    text_tasks = []
+    tasks = []
     # Calculate portion sizes
     missing = len(all_tasks) % workers
     portion_sizes = []
@@ -59,30 +60,16 @@ def splitup_tasks(all_tasks, workers, tasks_per_worker):
         w = tasks_per_worker + 1 if missing else tasks_per_worker
         portion_sizes.append(w)
         missing = missing - 1 if missing else 0
-    #print portion_sizes
     
     # Split-up tasks in portions
-    #print missing
-    #if missing > 0:
-    #    tasks_per_worker = tasks_per_worker + 1
-    #m = 0
     start = 0
     end = 0
-    #end = tasks_per_worker
-    #for i in range(workers):
     for w in portion_sizes:
         end = start + w
-        #print 'Start', start
-        #print 'End', end
         t = all_tasks[start:end]
-        text_tasks.append(t)
-        #m = m + 1
+        tasks.append(t)
         start = end
-        #if m >= missing:
-        #    end = end + tasks_per_worker - 1
-        #else:
-        #    end = end + tasks_per_worker
-    return text_tasks
+    return tasks
 
 if __name__ == '__main__':
     

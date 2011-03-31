@@ -75,7 +75,7 @@ def create_char_ngrams(n_char_ngrams, all_char_ngrams, text_char_ngrams):
         #print 'Text', t
         #freqs = text_char_ngrams[t]
         freqs = FreqDist(text_char_ngrams[t])
-        print freqs.items()[:5]
+        #print freqs.items()[:5]
         # TODO: Correct to calculate delta here from text-only?
         delta = freqs.Nr(1) / float(freqs.Nr(1) + 2*freqs.Nr(2))
         #print delta
@@ -85,7 +85,7 @@ def create_char_ngrams(n_char_ngrams, all_char_ngrams, text_char_ngrams):
         for r in range(tot_ngrams):
             ngram = all_char_ngrams_freqs.keys()[r]
             freq = freqs.freq(ngram)
-            print freq
+            #print freq
             feature_matrix[t].append(freq)
     
     return feature_matrix

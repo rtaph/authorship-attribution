@@ -3,7 +3,9 @@ from multiprocessing import Pool
 import time
 import sys
 from nltk.corpus import PlaintextCorpusReader
+from nltk.probability import FreqDist
 import fextract_helper
+import os
 
 wrd_ngrams = False
 wrd_ngram_size = 3
@@ -19,7 +21,7 @@ FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
 CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zlch06"
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_100_10"
 #corpus_root = "nobackup/blogs/a1_050_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/a1"
 
@@ -27,12 +29,22 @@ corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
 
 def cng_stats_worker(texts):
     # Depends on some variables to be global
-    return fextract_helper.char_ngram_stats(texts, corpus, \
+    #print os.getpid()
+    s1 = time.time()
+    a, t = fextract_helper.char_ngram_stats(texts, corpus, \
                                             n_char_ngrams, char_ngram_size)
+    e1 = time.time()
+    print 'Finding took', e1-s1, 'seconds'
+    return a, t
 
 def cng_create_worker(text_char_ngrams):
     # Depends on some variables to be global
-    return fextract_helper.create_char_ngrams(n_char_ngrams, all_char_ngrams, text_char_ngrams)
+    s1 = time.time()
+    #return fextract_helper.create_char_ngrams(n_char_ngrams, all_char_ngrams, text_char_ngrams)
+    f = fextract_helper.create_ngram_feats(mostfreq_cngs, text_char_ngrams)
+    e1 = time.time()
+    print 'Creating took', e1-s1, 'seconds'
+    return f
     
 def wng_stats_worker(texts):
     # Depends on some variables to be global
@@ -141,29 +153,45 @@ if __name__ == '__main__':
     
     if char_ngrams:
         # Find n-grams in texts
-        global all_char_ngrams
+        global mostfreq_cngs
         all_char_ngrams = []
         text_char_ngrams = []
         charngram_workers = Pool(cpus)
         #for bla in text_tasks:
         #    print 'Bla:', len(bla)
+        s1 = time.time()
         results = charngram_workers.map(cng_stats_worker, text_tasks)
+        e1 = time.time()
+        print 'map:', e1-s1
+        print 'Collecting'
         for r in results:
             all_char_ngrams.extend(r[0])
             text_char_ngrams.extend(r[1])
         charngram_workers.terminate()
+        print 'Calc'
+        s1 = time.time()
+        freqs = FreqDist(all_char_ngrams)
+        tot_cngs = min([n_char_ngrams, freqs.B()])
+        mostfreq_cngs = freqs.keys()[:tot_cngs]
+        e1 = time.time()
+        print 'Calc:', e1-s1
         #print 'List of n-grams:', len(text_char_ngrams)
         # Create features
         cng_tasks = splitup_tasks(text_char_ngrams, cpus, tasks_per_worker)
         #for bla in cng_tasks:
         #    print 'Bla:', len(bla)
+        
         charngram_features = []
         charngram_workers = Pool(cpus)
+        s1 = time.time()
         results = charngram_workers.map(cng_create_worker, cng_tasks)
+        e1 = time.time()
+        print 'Overall creation:', e1-s1
         for r in results:
             #print 'Result:', len(r)
             charngram_features.extend(r)
         charngram_workers.terminate()
+        
         print 'Char ngram features:', len(charngram_features)
     
     if wrd_ngrams:

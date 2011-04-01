@@ -31,7 +31,7 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_100_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_6"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/a1_3_40_multi"
@@ -101,11 +101,28 @@ feature_matrix = [[] for i in range(n_texts)]
 text_classes = fextract_helper.find_classes(corpus.fileids())
 
 if char_ngrams:
+    s1 = time.time()
     a, t = fextract_helper.char_ngram_stats(corpus.fileids(), corpus, n_char_ngrams, char_ngram_size)
-    feat_charngram = fextract_helper.create_char_ngrams(n_char_ngrams, a, t)
+    e1 = time.time()
+    print 'Finding took', e1-s1, 'seconds'
+    s1 = time.time()
+    freqs = FreqDist(a)
+    tot_cngs = min([n_char_ngrams, freqs.B()])
+    mostfreq_ngs = freqs.keys()[:tot_cngs]
+    e1 = time.time()
+    print 'Calc took', e1-s1, 'seconds'
+    #feat_charngram = fextract_helper.create_char_ngrams(n_char_ngrams, a, t)
+    s1 = time.time()
+    feat_charngram = fextract_helper.create_ngram_feats(mostfreq_ngs, t)
+    e1 = time.time()
+    print 'Creating took', e1-s1, 'seconds'
 if wrd_ngrams:
     a, t = fextract_helper.wrd_ngram_stats(corpus.fileids(), corpus, n_char_ngrams, char_ngram_size)
-    feat_wrdgram = fextract_helper.create_wrd_ngrams(n_wrd_ngrams, a, t)
+    freqs = FreqDist(a)
+    tot_wngs = min([n_wrd_ngrams, freqs.B()])
+    mostfreq_ngs = freqs.keys()[:tot_wngs]
+    #feat_wrdgram = fextract_helper.create_wrd_ngrams(n_wrd_ngrams, a, t)
+    feat_wrdgram = fextract_helper.create_ngram_feats(mostfreq_ngs, t)
 if function_words:
     func_wds, text_func_wrds = fextract_helper.extract_fws(corpus.fileids(), corpus, FUNC_FOLDER)
     feat_funcwrds = fextract_helper.create_fw_features(func_wds, text_func_wrds)

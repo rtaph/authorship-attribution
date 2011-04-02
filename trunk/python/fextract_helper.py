@@ -3,6 +3,7 @@ from nltk.probability import FreqDist
 from nltk.corpus import PlaintextCorpusReader
 import os
 import time
+import math
 
 def find_classes(texts):
     '''
@@ -100,6 +101,97 @@ def get_cngs(texts, corpus_root, ngram_size):
             ngs.extend(char_ng)
             
     return ngs
+
+def slr(x, y):
+    '''
+    Simple Linear Regression, y = a + bx
+    @return: a, b
+    '''
+    assert len(x) == len(y)
+    a = b = 0
+    avgx = float(sum(x)) / len(x)
+    avgy = float(sum(y)) / len(y)
+    n = d = 0
+    for i in range(len(x)):
+        n = n + ((x[i]-avgx)*(y[i]-avgy))
+        d = d + math.pow(x[i]-avgx,2)
+    b = n/d
+    a = avgy - (b*avgx)
+    return a, b
+
+def gt_nr_est(freqs):
+    '''
+    Smooth the Nr parameter for Good-Turing smoothing
+    @return: a, b, X for a linear regression of log(Nr) = a + b*log(r)
+    and X is the first r-value to start using smoothed nr's
+    '''
+    #CONFID_FACTOR = 1.96 # Adapted from http://www.grsampson.net/D_SGT.c
+    CONFID_FACTOR = 1.65
+    rl = sorted(list(set(freqs.values())))
+    if len(rl) < 4:
+        # There are too few (r,Nr)-pairs to smooth Nr
+        return None, None, None
+    logzr = []
+    nrl = []
+    for i in range(len(rl)):
+        nr = freqs.Nr(rl[i])
+        nrl.append(nr)
+        if i > 0 and i < len(rl)-1:
+            zr = (2*nr)/float(rl[i+1]-rl[i-1])
+            logzr.append(math.log10(zr))
+    #rl = rl[1:len(rl)-1] # rl must have same size as zrl
+    #print len(rl), len(zrl) 
+    logr = [math.log10(x) for x in rl[1:len(rl)-1]]
+    #logzr = [math.log10(x) for x in zrl]
+    #print logr, logzr
+    #print nrl
+    
+    
+    a, b = slr(logr, logzr)
+    X = 1
+    for i in range(len(rl)):
+        #print nr
+        r = rl[i]
+        nr = nrl[i]
+        nr1 = nrl[i+1]
+        if nr == 0:
+            X = r
+            break 
+        snr = math.pow(10, a + (b*math.log10(r)))
+        stddev = math.sqrt((r+1)*(r+1)*(nr1/(nr*nr))*(1+(nr1/nr1)))
+        
+        if math.fabs(nr-snr) > CONFID_FACTOR * stddev:
+            X = r
+            #print 'X',X
+            break
+    
+    return a, b, X
+    
+    
+
+def gt_smoothing(freqs, N, ngram, a, b, X):
+    '''
+    Perform Good-Turing smoothing on an ngram.
+    a and b are from the linear regression log(Nr) = a + b*log(r)
+    '''   
+    #R_BORDER = 5 
+    r = freqs[ngram]
+    #if r == 0:
+    #    nr = nr0
+    nr = freqs.Nr(r)
+    if nr == 0 or r >= X: # Good-Turing estimate for high r
+        nr = math.pow(10, a + (b*math.log10(r)))
+    #else: # Turing estimate for low non-zero r
+    #    nr = freqs.Nr(r)
+    if r+1 >= X:
+        nr1 = math.pow(10, a + (b*math.log10(r+1)))
+    else:
+        nr1 = freqs.Nr(r+1)
+    
+    rstar = (r+1) * (nr1/float(nr))
+    #print ngram, r, nr, nr1, rstar
+    
+    return rstar/N
     
 def create_ngram_feats(ngrams, text_ngrams):
     '''
@@ -107,6 +199,8 @@ def create_ngram_feats(ngrams, text_ngrams):
     to consider given in ngrams argument. Can be used for both
     chars and words
     '''
+    GT_SMOOTHING = True
+    
     n_texts = len(text_ngrams)
     print os.getpid(), ": Creating n-grams features for", n_texts, "texts"
     feature_matrix = [[] for i in range(n_texts)]
@@ -115,12 +209,39 @@ def create_ngram_feats(ngrams, text_ngrams):
     # Select char n-gram features
     for t in range(n_texts):
         freqs = FreqDist(text_ngrams[t])
-        #print 'Text', t
-            
+        print 'Text', t
+        
+        if GT_SMOOTHING:
+            a, b, X = gt_nr_est(freqs)
+            N = freqs.N()
+            # count the ngrams that did not occur so we know how many ngrams
+            # that have frequency=0
+            #nr0 = 0
+            #for ngram in ngrams:
+            #    if freqs[ngram] == 0:
+            #        nr0 = nr0 + 1
+            #print 'No. of ngrams that does not occur:', nr0
+            #print freqs.Nr(1), N
+            #print freqs.Nr(2)
+            # THIS IS FOR ALL UNSEEN OBJECTS, NOT ONE
+            #p0 = freqs.Nr(1) / float(N)
+            #print freqs.items()[:5] 
+        
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text
-        for ngram in ngrams:            
+        for ngram in ngrams:
+            
             freq = freqs.freq(ngram)
+            #if freqs[ngram] == 1:
+            #    print 'T', freq
+            if GT_SMOOTHING:
+                #if freq == 0:
+                #    freq = p0
+                if freqs[ngram] > 0 and a is not None and \
+                b is not None and b <= -1:
+                    freq = gt_smoothing(freqs, N, ngram, a, b, X)
+            
+            print ngram, freq
             feature_matrix[t].append(freq)
     #end = time.time()
     #print os.getpid(), ": Used", (end-start)/n_texts, "seconds per text"
@@ -182,17 +303,6 @@ def wrd_ngram_stats(texts, corpus, n_wrd_ngrams, wrd_ngram_size):
             text_wrd_ngrams.append([])
             
     return all_wd_ngrams, text_wrd_ngrams
-
-def gt_smoothing(freqs):
-    r = freqs[ngram]
-    #r = freqs.count(ngram)
-    nr = freqs.Nr(r)
-    nr1 = freqs.Nr(r+1)
-    print r, nr, nr1
-    rstar = (r+1) * (nr1/float(nr))
-    print rstar
-    N = freqs.N()
-    # Don't just update freqs
 
 # Inefficient version!
 #def create_wrd_ngrams(n_wrd_ngrams, all_wd_ngrams, text_wrd_ngrams):

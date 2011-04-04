@@ -139,28 +139,29 @@ def gt_nr_est(freqs):
         if i > 0 and i < len(rl)-1:
             zr = (2*nr)/float(rl[i+1]-rl[i-1])
             logzr.append(math.log10(zr))
-    #rl = rl[1:len(rl)-1] # rl must have same size as zrl
-    #print len(rl), len(zrl) 
     logr = [math.log10(x) for x in rl[1:len(rl)-1]]
-    #logzr = [math.log10(x) for x in zrl]
-    #print logr, logzr
-    #print nrl
-    
-    
     a, b = slr(logr, logzr)
-    X = 1
-    for i in range(len(rl)):
-        #print nr
+    
+    # Find point (r) where to start using smoothed Nr's. This is
+    # the place where the Nr's are no longer significantly different
+    # from the smoothed Nr's
+    X = len(rl)
+    for i in range(len(rl)-1):
+        
         r = rl[i]
-        nr = nrl[i]
-        nr1 = nrl[i+1]
+        nr = float(nrl[i])
+        nr1 = float(nrl[i+1])
         if nr == 0:
             X = r
             break 
         snr = math.pow(10, a + (b*math.log10(r)))
-        stddev = math.sqrt((r+1)*(r+1)*(nr1/(nr*nr))*(1+(nr1/nr1)))
+        stdv = math.sqrt((r+1)*(r+1)*(nr1/(nr*nr))*(1+(nr1/nr)))
+        #print r, nr, nr1, snr, stdv
         
-        if math.fabs(nr-snr) > CONFID_FACTOR * stddev:
+        # If the difference between Nr and smoothed Nr has dropped
+        # below CONFID_FACTOR * standard deviation, the Nr is no longer
+        # significantly different and we will use smoothed Nr from here
+        if math.fabs(nr-snr) <= CONFID_FACTOR * stdv:
             X = r
             #print 'X',X
             break
@@ -169,29 +170,49 @@ def gt_nr_est(freqs):
     
     
 
-def gt_smoothing(freqs, N, ngram, a, b, X):
+def gt_smoothing(freqs, a, b, X):
     '''
-    Perform Good-Turing smoothing on an ngram.
+    Good-Turing smoothing: Find r* for all r>=1
     a and b are from the linear regression log(Nr) = a + b*log(r)
-    '''   
-    #R_BORDER = 5 
-    r = freqs[ngram]
-    #if r == 0:
-    #    nr = nr0
-    nr = freqs.Nr(r)
-    if nr == 0 or r >= X: # Good-Turing estimate for high r
-        nr = math.pow(10, a + (b*math.log10(r)))
-    #else: # Turing estimate for low non-zero r
-    #    nr = freqs.Nr(r)
-    if r+1 >= X:
-        nr1 = math.pow(10, a + (b*math.log10(r+1)))
-    else:
+    @return: Dictionary with key=r, value=r*
+    '''
+    
+    rl = sorted(list(set(freqs.values()))) # list of r
+    rsl = {} # dict of r,r*
+    
+    for r in rl:
+        
+        nr = freqs.Nr(r)
         nr1 = freqs.Nr(r+1)
+        
+        if a is not None and b is not None and b <= -1: 
+            if nr == 0 or r >= X: # Good-Turing estimate for high r
+                nr = math.pow(10, a + (b*math.log10(r)))
+            if r+1 >= X:
+                nr1 = math.pow(10, a + (b*math.log10(r+1)))
     
-    rstar = (r+1) * (nr1/float(nr))
-    #print ngram, r, nr, nr1, rstar
+        rstar = (r+1) * (nr1/float(nr))
+        #print r, nr, nr1, rstar
+        if rstar > 0:
+            rsl[r] = rstar
+        else:
+            rsl[r] = r # Occurs when too few seen objects
     
-    return rstar/N
+#    r = freqs[ngram]
+#    nr = freqs.Nr(r)
+#        
+#    if nr == 0 or r >= X: # Good-Turing estimate for high r
+#        nr = math.pow(10, a + (b*math.log10(r)))
+#    if r+1 >= X:
+#        nr1 = math.pow(10, a + (b*math.log10(r+1)))
+#    else:
+#        nr1 = freqs.Nr(r+1)
+#    
+#    rstar = (r+1) * (nr1/float(nr))
+    #freq = rstar/N
+    #print r, ngram, freq, freqs.freq(ngram)
+    
+    return rsl
     
 def create_ngram_feats(ngrams, text_ngrams):
     '''
@@ -200,6 +221,8 @@ def create_ngram_feats(ngrams, text_ngrams):
     chars and words
     '''
     GT_SMOOTHING = True
+    GT_RENORM = True
+    GT_P0 = True
     
     n_texts = len(text_ngrams)
     print os.getpid(), ": Creating n-grams features for", n_texts, "texts"
@@ -212,39 +235,71 @@ def create_ngram_feats(ngrams, text_ngrams):
         print 'Text', t
         
         if GT_SMOOTHING:
+            # Find parameters for smoothed Nr
             a, b, X = gt_nr_est(freqs)
             N = freqs.N()
-            # count the ngrams that did not occur so we know how many ngrams
-            # that have frequency=0
-            #nr0 = 0
-            #for ngram in ngrams:
-            #    if freqs[ngram] == 0:
-            #        nr0 = nr0 + 1
-            #print 'No. of ngrams that does not occur:', nr0
-            #print freqs.Nr(1), N
-            #print freqs.Nr(2)
-            # THIS IS FOR ALL UNSEEN OBJECTS, NOT ONE
-            #p0 = freqs.Nr(1) / float(N)
-            #print freqs.items()[:5] 
+            p0_all = 1.0
+            if N > 0: 
+                p0_all = freqs.Nr(1) / float(N) # Probability for all unseen objects
+            #print 'p0_all', p0_all
+            # Dict of r,r*
+            #print 'X', X
+            rsl = gt_smoothing(freqs, a, b, X)
+            #print rsl
+            # Nstar is the total number of objects, using estimated r
+            Nstar = 0
+            for p in rsl.items():
+                Nr = freqs.Nr(p[0])
+                Nstar = Nstar + (Nr * p[1])
+            #if Nstar == 0:
+            #    print 'X', X
+            #    print freqs.items()
+            # Calculate p0
+            unseen = 0
+            for ngram in ngrams:
+                if freqs[ngram] == 0:
+                    unseen = unseen + 1
+            if unseen > 0:
+                p0 = p0_all / float(unseen)
+                #print 'p0', p0
+            #else:
+            #    p0 = p0_all
+            #p0 = 0
+            
         
         # Step through X most frequent n-grams across corpus, the feature is the
-        # relative frequency for each n-gram in each text
+        # relative frequency for each n-gram in each text 
         for ngram in ngrams:
             
             freq = freqs.freq(ngram)
-            #if freqs[ngram] == 1:
-            #    print 'T', freq
-            if GT_SMOOTHING:
-                #if freq == 0:
-                #    freq = p0
-                if freqs[ngram] > 0 and a is not None and \
-                b is not None and b <= -1:
-                    freq = gt_smoothing(freqs, N, ngram, a, b, X)
             
-            print ngram, freq
+            #if freq == 0:
+            #    unseen = unseen + 1
+            #print 'freq', freq
+            if GT_SMOOTHING:
+                r = freqs[ngram]
+                if r > 0: # GT smoothing for seen objects
+                    rstar = rsl[r]
+                    pr = rstar/float(N)
+                    #print ngram, r, pr, freq
+                    # re-normalize probability
+                    if GT_RENORM:
+                        freq = (1-p0_all)*(rstar/Nstar)
+                    else:
+                        freq = pr
+                elif GT_P0:
+                    freq = p0
+                
+                #print 'gtfreq', freq
+                #if freqs[ngram] > 0 and a is not None and \
+                #b is not None and b <= -1:
+                #    freq = gt_smoothing(freqs, N, ngram, a, b, X)
+                
             feature_matrix[t].append(freq)
+            
     #end = time.time()
     #print os.getpid(), ": Used", (end-start)/n_texts, "seconds per text"
+    
     return feature_matrix
 
 # Inefficient version!

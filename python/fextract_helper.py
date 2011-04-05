@@ -222,7 +222,7 @@ def create_ngram_feats(ngrams, text_ngrams):
     '''
     GT_SMOOTHING = True
     GT_RENORM = True
-    GT_P0 = True
+    GT_P0 = False
     
     n_texts = len(text_ngrams)
     print os.getpid(), ": Creating n-grams features for", n_texts, "texts"
@@ -260,12 +260,8 @@ def create_ngram_feats(ngrams, text_ngrams):
                 if freqs[ngram] == 0:
                     unseen = unseen + 1
             if unseen > 0:
-                p0 = p0_all / float(unseen)
-                #print 'p0', p0
-            #else:
-            #    p0 = p0_all
-            #p0 = 0
-            
+                p0 = p0_all / float(unseen)   
+                print 'Unseen', unseen, 'p0', p0         
         
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text 
@@ -281,7 +277,7 @@ def create_ngram_feats(ngrams, text_ngrams):
                 if r > 0: # GT smoothing for seen objects
                     rstar = rsl[r]
                     pr = rstar/float(N)
-                    #print ngram, r, pr, freq
+                    print ngram, pr
                     # re-normalize probability
                     if GT_RENORM:
                         freq = (1-p0_all)*(rstar/Nstar)

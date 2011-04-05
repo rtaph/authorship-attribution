@@ -1,13 +1,13 @@
-import nltk
-import os
+'''
+Statistics about a given corpus
+'''
 from math import sqrt
 from nltk.corpus import PlaintextCorpusReader
-import unicodedata
 
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/data_formatted"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/set20_20_1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/temp4"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_200_10"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_200_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 
 corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding="UTF-8")
@@ -23,27 +23,14 @@ TEXT_STATS = True
 
 for text in corpus.fileids():
     
-    #if not text.endswith(".txt"):
-    #    continue
-    #print text
-    
     if DISTINCT_AUTHORS:
         found_category = text.partition(".")[0]
         text_classes.append(found_category)
         
         
     if TEXT_STATS:
-        #print text
         wrd_tokens = corpus.words(text)
         
-        #if len(corpus.raw(text)) < 2:
-        #    print text
-        #    print len(corpus.raw(text))
-        #for bla in corpus.raw(text)[-5:-1]:
-        #    print unicode(bla)
-            #print ord(unicode(bla))
-        #print len(wrd_tokens)
-        #print wrd_tokens[:10]
         if len(corpus.raw(text)) > 0 and len(wrd_tokens) > 0:
             lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
             #for bla in wrd_tokens[:10]:

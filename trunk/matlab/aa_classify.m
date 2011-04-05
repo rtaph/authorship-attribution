@@ -37,8 +37,10 @@ end
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.cat.txt');
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set10_10_2.out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set10_10_2.cat.txt');
-data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_050_10.out.txt');
-classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_050_10.cat.txt');
+%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_050_10.out.txt');
+%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_050_10.cat.txt');
+data = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.out.txt');
+classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.cat.txt');
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.cat.txt');
 
@@ -96,7 +98,7 @@ end
 
 
 tic;
-k = 4;
+k = 5;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nRealClasses,k); % precision per class
 classRecalls = zeros(nRealClasses,k); % recall per class

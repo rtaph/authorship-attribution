@@ -9,11 +9,11 @@ from nltk.corpus import PlaintextCorpusReader
 import random
 import shutil
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/data_formatted5"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/data_formatted5"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data_20"
+output = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/set20_10_1"
 
-output = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_200_10"
-
-NAUTHORS = 50
+NAUTHORS = 10
 a = 0
 authors = {}
 NTEXTS = 10

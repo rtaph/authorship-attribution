@@ -30,8 +30,8 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/PersonaeCorpus_onlineVersion/set3"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/set20_30_1"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_6"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/a1_3_40_multi"

@@ -14,37 +14,10 @@ def slr(x, y):
         d = d + math.pow(x[i]-avgx,2)
     b = n/d
     a = avgy - (b*avgx)
-    return a, b  
+    return a, b
 
-#def k_fold_cv(X, K, randomise = False):
-#    """
-#    From http://code.activestate.com/recipes/521906/
-#    Generates K (training, validation) pairs from the items in X.
-#
-#    Each pair is a partition of X, where validation is an iterable
-#    of length len(X)/K. So each training iterable is of length (K-1)*len(X)/K.
-#
-#    If randomise is true, a copy of X is shuffled before partitioning,
-#    otherwise its order is preserved in training and validation.
-#    """
-#    if randomise: from random import shuffle; X=list(X); shuffle(X)
-#    for k in xrange(K):
-#        training = [x for i, x in enumerate(X) if i % K != k]
-#        validation = [x for i, x in enumerate(X) if i % K == k]
-#        yield training, validation
 
-def k_fold_cv(X, K):
-    for k in xrange(K):
-        for x in X:
-            training = [y for i, y in enumerate(x) if i % K != k]
-            validation = [y for i, y in enumerate(x) if i % K == k]
-            yield training, validation
-            
-
-#X = [i for i in xrange(97)]
-#for training, validation in k_fold_cross_validation(X, K=7):
-#    for x in X: assert (x in training) ^ (x in validation), x
-## end of http://code.activestate.com/recipes/521906/ }}}
+#TODO: Returns something weird!
 
 def k_fold_cv_ind(classes, K):
     '''

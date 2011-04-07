@@ -10,66 +10,60 @@ char_ngram_size = 3
 
 corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
 
-def nb_train(data_classes, data, features, D):
+def nb_train(data_classes, data, D):
     '''
     Train Naive Bayes classifier
-    @param ctfeatures: Class-text features: For each class, the texts that
-    belong to the class and for each text the features that are found in the
-    text
-    @param features: The features that should be taken into account 
-    
+        
     @return: Prior class probabilities, 
     '''
     
     classes = list(set(data_classes))    
     ntexts_perclass = {} # no. of texts per class
     
+    # Find probability for a feature having a specific value
+    # given a class
     fcps = {}
     for c in classes:
         mydata = []
         for i in range(len(data_classes)):
             if data_classes[i] == c:
                 mydata.append(data[i])
-        fps = nb_trainclass(mydata, features, D) # feature probabilities (no. of features x no. of feature bins)
+        # feature probabilities (no. of features x no. of feature bins)
+        print 'Training for', c, 'with', len(mydata), 'texts'
+        fps = nb_trainclass(mydata, D)
         #print 'X', len(fps[0])
         fcps[c] = fps
         ntexts_perclass[c] = data_classes.count(c)
     
-    cps = {} # prior probability per class
-    ntexts = len(text_classes) # no. of texts
-    
     # Find prior probability for each class
+    cps = {}
+    ntexts = len(text_classes)
     for c in classes:
         cps[c] = ntexts_perclass[c] / float(ntexts)
 
+    #print cps
     return cps, fcps 
 
-def nb_trainclass(data, features, D):
+def nb_trainclass(features, D):
     '''
-    Naive Bayes training for a single class.
-    @param data: Features of the class
-    @param features: Features to look for
+    Naive Bayes training for a single class. Uses F features from N texts
+    of a given class.
+    @param features: A matrix of features for each text, size N x F
     '''
-    
-    # Frequency distributions for each text in data
-    # TODO: Should not depend on nltk module
-    freqs = []
-    for d in data:
-        freqs.append(FreqDist(d))
    
     fpf = []
-     
-    for feature in features:
-        feature_bins = int(math.pow(10, D))
-        #print 'bins', feature_bins
-        
-        #l = range(feature_bins)
+    
+    feature_bins = int(math.pow(10, D)) 
+    #print 'bins', feature_bins
+    
+    for i in range(len(features[0])):
         
         # For each bin; for how many documents did the feature fit into that bin 
-        fb = [0 for i in range(feature_bins)]
-        for fr in freqs:
-            # TODO: This could be smoothed...?
-            f = fr.freq(feature)
+        fb = [0 for j in range(feature_bins)]
+        for row in features:
+            
+            #f = fr.freq(feature)
+            f = row[i] # feature value
             #print f
             bin = int(round(f,D) * feature_bins)
             fb[bin] = fb[bin] + 1
@@ -95,7 +89,7 @@ def nb_trainclass(data, features, D):
         for i in range(feature_bins):
             if fb[i] != 0:
                 # TODO: Correct to divide by docs here?
-                pf[i] = (fb[i] / float(len(data))) - negp
+                pf[i] = (fb[i] / float(len(features))) - negp
         
         #print pf
         #print sum(pf)
@@ -103,13 +97,18 @@ def nb_trainclass(data, features, D):
       
     return fpf
 
-def nb_classify(cps, fcps, classes, data):
+def nb_classify(cps, fcps, classes, data, D):
     
-    for d in data:
-        bestc, bestp = nb_classify_text(cps, fcps, d)
-        print bestc, bestp
+    classified = []
+    for i in range(len(data)):
+        d = data[i]
+        c = classes[i]
+        bestc, bestp = nb_classify_text(cps, fcps, d, D)
+        classified.append(bestc)
+    return classified
+    #print bestc, bestp
 
-def nb_classify_text(cps, fcps, tfeat):
+def nb_classify_text(cps, fcps, tfeat, D):
     '''
     @param cps: Dict of prior class probabilities
     @param fcps: Dict of probabilities for each feature occurring in the class (key)
@@ -118,24 +117,32 @@ def nb_classify_text(cps, fcps, tfeat):
     @return: A tuple c, p. c is the class that the tfeat most likely
     occur in. p is the probability with which they occur.
     '''
+    feature_bins = int(math.pow(10, D)) 
     
-    # For each class: Find probability for tfeat belonging to class
+    # For each class: Find probability for each feature
     ps = {}
     for c in cps:
         cp = cps[c] # prior class probability
-        p = math.log(cp)
-        for f in tfeat:
-            print f
-            fp = fcps[c][f] # probability for feature belonging to class
-            p = p + math.log(fp)
+        #p = math.log(cp)
+        p = cp
+        #print 'Before', cp, p
+        for i in range(len(tfeat)):
+            f = tfeat[i]
+            #print f
+            bin = int(round(f,D) * feature_bins)
+            fp = fcps[c][i][bin] # probability for feature belonging to class
+            #fp = fcps[c][i][f] # probability for feature belonging to class
+            #p = p + math.log(fp)
+            p = p * fp
+        #print p
         ps[c] = p
     
     # Find highest probability and hereby most likely class
     bestc = None
-    bestp = 0
+    bestp = None
     for c in ps:
         p = ps[c] # probability for assigning text to class
-        if p > bestp: # found better probability
+        if bestp is None or p > bestp: # found better probability
             bestc = c
             bestp = p
     
@@ -146,6 +153,7 @@ if __name__ == '__main__':
     corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
     texts = corpus.fileids()
     text_classes = fextract_helper.find_classes(texts)
+    ntexts = len(texts)
     #classes = list(set(text_classes))
     
     all_ngrams, text_ngrams = fextract_helper.char_ngram_stats(texts, corpus, n_char_ngrams, char_ngram_size)
@@ -153,7 +161,17 @@ if __name__ == '__main__':
     # Determine features
     afreqs = FreqDist(all_ngrams)
     tot_cngs = min([n_char_ngrams, afreqs.B()])
-    features = afreqs.keys()[:tot_cngs]
+    mostfreqngs = afreqs.keys()[:tot_cngs]
+    
+    # TODO: This could be smoothed...?
+    # Calculate features for each text
+    features = []
+    for t in text_ngrams:
+        myfeats = [] # features for the current text
+        freqdist = FreqDist(t)
+        for f in mostfreqngs:
+            myfeats.append(freqdist.freq(f))
+        features.append(myfeats)
     
     # TODO: Should be calculated (?)
     d = 3
@@ -162,31 +180,27 @@ if __name__ == '__main__':
     # Cross-validation
     K = 3
     k_indices = util.k_fold_cv_ind(text_classes,K)
+    
     for k in range(K):
+        
+        print '---------------   k=' + str(k) + '  ------------------'
+        
         trainc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] != k]
-        traint = [text_ngrams[i] for i in range(len(text_ngrams)) if k_indices[i] != k]
+        traint = [features[i] for i in range(len(features)) if k_indices[i] != k]
         testc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] == k]
-        testt = [text_ngrams[i] for i in range(len(text_ngrams)) if k_indices[i] == k]
+        testt = [features[i] for i in range(len(features)) if k_indices[i] == k]
         
-
-        
-        featfreqs = []
-        for t in testt:
-            freqs = FreqDist(t)
-            f = [] # features for this text
-            for feat in features:
-                bin = int(round(freqs.freq(feat),d) * feature_bins)
-                print 'bin', bin
-                f.append(bin)
-            featfreqs.append(f)
-        
-        print trainc
-        print testc
+        print 'Train texts:', len(traint)
+        print 'Test texts:', len(testt)
     
-        # TODO: Extract features that we need before calling the functions below?
-    
-        cps, fcps = nb_train(trainc, traint, features, d)
-        nb_classify(cps, fcps, testc, featfreqs)
+        cps, fcps = nb_train(trainc, traint, d)
+        classified = nb_classify(cps, fcps, testc, testt, d)
+        
+        correct = 0
+        for i in range(len(classified)):
+            if classified[i] == testc[i]:
+                correct = correct + 1
+        print 'A:', correct / float(len(testc))
         
     #print cps
     #for x in fcps['620124']:

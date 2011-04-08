@@ -4,10 +4,10 @@ Statistics about a given corpus
 from math import sqrt
 from nltk.corpus import PlaintextCorpusReader
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/set20_20_1"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/set20_20_1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/temp4"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_200_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_27_all"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 
 corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding="UTF-8")

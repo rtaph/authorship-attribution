@@ -46,6 +46,7 @@ def char_ngram_stats(texts, corpus, n_char_ngrams, char_ngram_size):
     text_char_ngrams = [] # The frequency of char n-grams found in each text
     
     for text in texts:
+        #print text
         
         if not text.endswith(".txt"):
             continue
@@ -110,8 +111,8 @@ def create_ngram_feats(ngrams, text_ngrams):
     to consider given in ngrams argument. Can be used for both
     chars and words
     '''
-    GT_SMOOTHING = True
-    GT_RENORM = True
+    GT_SMOOTHING = False
+    GT_RENORM = False
     GT_P0 = False
     
     n_texts = len(text_ngrams)

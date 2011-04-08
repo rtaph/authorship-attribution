@@ -5,10 +5,10 @@ from nltk.probability import FreqDist
 from nltk.corpus import PlaintextCorpusReader
 
 
-n_char_ngrams = 200
+n_char_ngrams = 150
 char_ngram_size = 3 
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_40_all"
 
 if __name__ == '__main__':
     
@@ -16,17 +16,19 @@ if __name__ == '__main__':
     texts = corpus.fileids()
     text_classes = fextract_helper.find_classes(texts)
     ntexts = len(texts)
-    #classes = list(set(text_classes))
     
+    print 'Finding ngrams in texts...'
     all_ngrams, text_ngrams = fextract_helper.char_ngram_stats(texts, corpus, n_char_ngrams, char_ngram_size)
     
     # Determine features
+    print 'Finding most frequent n-grams...'
     afreqs = FreqDist(all_ngrams)
     tot_cngs = min([n_char_ngrams, afreqs.B()])
     mostfreqngs = afreqs.keys()[:tot_cngs]
     
-    # TODO: This could be smoothed...?
     # Calculate features for each text
+    # TODO: This could be smoothed...?
+    print 'Calculating features...'
     features = []
     for t in text_ngrams:
         myfeats = [] # features for the current text
@@ -34,16 +36,17 @@ if __name__ == '__main__':
         for f in mostfreqngs:
             myfeats.append(freqdist.freq(f))
         features.append(myfeats)
-        
-    nbins = 10
-    bins = naivebayes.build_feat_bins(features, nbins)
-    print 'bins', bins
     
+    # Find feature-value bins
+    nbins = 100
+    bins = naivebayes.build_feat_bins(features, nbins)
+    print 'bins', bins, len(bins)
     #d = 3
     #feature_bins = int(math.pow(10, d))    
     
     # Cross-validation
-    K = 3
+    print 'Doing cross-validation...'
+    K = 10
     k_indices = util.k_fold_cv_ind(text_classes,K)
     
     for k in range(K):
@@ -59,8 +62,10 @@ if __name__ == '__main__':
         print 'Test texts:', len(testt)
     
         cps, fcps = naivebayes.nb_train(trainc, traint, bins)
+        print 'Classifying..'
         classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins)
         
+        # Calculate performance measures
         correct = 0
         for i in range(len(classified)):
             if classified[i] == testc[i]:

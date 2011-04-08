@@ -20,7 +20,7 @@ def nb_train(data_classes, data, bins):
             if data_classes[i] == c:
                 mydata.append(data[i])
         # feature probabilities (no. of features x no. of feature bins)
-        print 'Training for', c, 'with', len(mydata), 'texts'
+        #print '------ Training for', c, 'with', len(mydata), 'texts -------'
         fps = nb_trainclass(mydata, bins)
         #print 'X', len(fps[0])
         fcps[c] = fps
@@ -35,8 +35,6 @@ def nb_train(data_classes, data, bins):
     #print cps
     return cps, fcps 
 
-#def nb_trainclass(features, D):
-
 def nb_trainclass(features, bins):
     '''
     Naive Bayes training for a single class. Uses F features from N texts
@@ -44,16 +42,14 @@ def nb_trainclass(features, bins):
     @param features: A matrix of features for each text, size N x F
     '''
    
+    # feature-wise probabilities 
     fpf = []
     
-    #feature_bins = int(math.pow(10, D)) 
-    #print 'bins', feature_bins
     nbins = len(bins)
     
     for i in range(len(features[0])):
         
         # For each bin; for how many documents did the feature fit into that bin 
-        #fb = [0 for j in range(feature_bins)]
         fb = [0 for j in range(nbins)]
         for row in features:
             
@@ -73,7 +69,7 @@ def nb_trainclass(features, bins):
         # Incorporate a small-sample correction in all probability estimates
         # such that no probability is ever set to be exactly zero
         #minp = 1/float(feature_bins*feature_bins) # min. probability for unseen
-        minp = 1/float(nbins*nbins) # min. probability for unseen
+        minp = 1/float(math.pow(nbins, 3)) # low min. probability for unseen
         r0 = fb.count(0) # no. of unseen
         #print 'r0', r0
         #totminp = r0 / float(feature_bins*10)
@@ -95,6 +91,10 @@ def nb_trainclass(features, bins):
             if fb[i] != 0:
                 # TODO: Correct to divide by docs here?
                 pf[i] = (fb[i] / float(len(features))) - negp
+                if pf[i] <= 0:
+                    pf[i] = minp
+                    #print 'Too low', minp, totminp, rpos, r0, negp, fb, (fb[i] / float(len(features))),  pf[i]
+                    #exit()
         
         #print pf
         #print sum(pf)
@@ -102,26 +102,21 @@ def nb_trainclass(features, bins):
       
     return fpf
 
-#def nb_classify(cps, fcps, classes, data, D):
-
 def nb_classify(cps, fcps, classes, data, bins):
     
     classified = []
-    for i in range(len(data)):
-        d = data[i]
-        #bestc, bestp = nb_classify_text(cps, fcps, d, D)
+    for d in data:
         bestc, bestp = nb_classify_text(cps, fcps, d, bins)
         classified.append(bestc)
     return classified
-    #print bestc, bestp
-
-#def nb_classify_text(cps, fcps, tfeat, D):
 
 def nb_classify_text(cps, fcps, tfeat, bins):
     '''
-    @param cps: Dict of prior class probabilities
-    @param fcps: Dict of probabilities for each feature occurring in the class (key)
+    @param cps: Dict of prior class probabilities, key: class.
+    @param fcps: Dict of dict of list of probabilities for each feature-bin.
+    1st key: class, 2nd key: feature no., list-index: feature-bin.
     @param tfeat: Features of a text to be classified
+    @param bins: Feature-bins, defined by frequency upper-bounds
     
     @return: A tuple c, p. c is the class that the tfeat most likely
     occur in. p is the probability with which they occur.
@@ -142,6 +137,7 @@ def nb_classify_text(cps, fcps, tfeat, bins):
             #bin = int(round(f,D) * feature_bins)
             bin = find_feat_bin(f, bins)
             fp = fcps[c][i][bin] # probability for feature belonging to class
+            #print 'class', c, 'feat', i, 'bin', bin, 'fp', fp
             p = p + math.log(fp)
             #p = p * fp
         #print p
@@ -178,22 +174,37 @@ def build_feat_bins(features, b):
     floats between 0 and 1.
     @return: A list of upper-bounds for each of b bins.
     '''
-    max = 0
-    min = 1
-    for t in features:
-        s = list(set(sorted(t)))
-        lclmin = s[0]
-        if lclmin == 0:
-            if len(s) > 1:
-                lclmin = s[1]
-            else:
-                lclmin = 1
-        lclmax = s[-1]
-        if lclmin < min:
-            min = lclmin
-        if lclmax > max:
-            max = lclmax
+#    # Old: Construct bins so they range from min to max
+#    max = 0
+#    min = 1
+#    for t in features:
+#        s = list(set(sorted(t)))
+#        lclmin = s[0]
+#        if lclmin == 0:
+#            if len(s) > 1:
+#                lclmin = s[1]
+#            else:
+#                lclmin = 1
+#        lclmax = s[-1]
+#        if lclmin < min:
+#            min = lclmin
+#        if lclmax > max:
+#            max = lclmax
+#    print min, max, (max-min)/float(b)
+#    return numpy.arange(min,max,(max-min)/float(b)).tolist()
+
+    # New: Construct features so the average feature-value is in the middle bin
+    #N = len(features)*len(features[0])
+    #s = sum([sum(f) for f in features])    
+    #su = 0
+    #for t in features:
+    #    su = su + sum(t)
+            
+    avg = sum([sum(f) for f in features]) / float(len(features)*len(features[0]))
+    #print 'avg', avg
+    interval = avg / float(b) * 2 # b/2 bins on each side of the avg
+    #print 'interval', interval 
     
-    return numpy.arange(min,max,(max-min)/float(b)).tolist()
+    return numpy.arange(interval,avg+(((b/2)+1)*interval),interval).tolist()
         
     

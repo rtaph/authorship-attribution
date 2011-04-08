@@ -5,7 +5,6 @@ def slr(x, y):
     Simple Linear Regression, y = a + bx
     @return: a, b
     '''
-    a = b = 0
     avgx = float(sum(x)) / len(x)
     avgy = float(sum(y)) / len(y)
     n = d = 0

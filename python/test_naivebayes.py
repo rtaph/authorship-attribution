@@ -6,9 +6,16 @@ from nltk.corpus import PlaintextCorpusReader
 
 
 n_char_ngrams = 150
-char_ngram_size = 3 
+char_ngram_size = 3
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_27_all"
+NBINS = 10
+
+CV_K = 3
+
+top=10
+
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_40_all"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data_100"
 
 if __name__ == '__main__':
     
@@ -25,6 +32,8 @@ if __name__ == '__main__':
     afreqs = FreqDist(all_ngrams)
     tot_cngs = min([n_char_ngrams, afreqs.B()])
     mostfreqngs = afreqs.keys()[:tot_cngs]
+    print mostfreqngs
+    
     
     # Calculate features for each text
     # TODO: This could be smoothed...?
@@ -38,19 +47,16 @@ if __name__ == '__main__':
         features.append(myfeats)
     
     # Find feature-value bins
-    nbins = 100
-    bins = naivebayes.build_feat_bins(features, nbins)
+    bins = naivebayes.build_feat_bins(features, NBINS)
     print 'bins', bins, len(bins)
     #d = 3
     #feature_bins = int(math.pow(10, d))    
     
     # Cross-validation
     print 'Doing cross-validation...'
-    K = 10
-    k_indices = util.k_fold_cv_ind(text_classes,K)
-    Top=3
+    k_indices = util.k_fold_cv_ind(text_classes,CV_K)
     
-    for k in range(K):
+    for k in range(CV_K):
         
         print '---------------   k=' + str(k) + '  ------------------'
         
@@ -64,7 +70,7 @@ if __name__ == '__main__':
     
         cps, fcps = naivebayes.nb_train(trainc, traint, bins)
         print 'Classifying..'
-        classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins, Top)
+        classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins, top)
         
         # Calculate performance measures
         correct = 0
@@ -78,5 +84,5 @@ if __name__ == '__main__':
             if best_classes.count(testc[i]) > 0:
                 top_correct = top_correct + 1
         print 'A:', correct / float(len(testc))
-        print 'A (top ' + str(Top) + "): " + str(top_correct / float(len(testc)))
+        print 'A (top ' + str(top) + "): " + str(top_correct / float(len(testc)))
         

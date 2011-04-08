@@ -8,7 +8,7 @@ from nltk.corpus import PlaintextCorpusReader
 n_char_ngrams = 150
 char_ngram_size = 3 
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_40_all"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_27_all"
 
 if __name__ == '__main__':
     
@@ -48,6 +48,7 @@ if __name__ == '__main__':
     print 'Doing cross-validation...'
     K = 10
     k_indices = util.k_fold_cv_ind(text_classes,K)
+    Top=3
     
     for k in range(K):
         
@@ -63,12 +64,19 @@ if __name__ == '__main__':
     
         cps, fcps = naivebayes.nb_train(trainc, traint, bins)
         print 'Classifying..'
-        classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins)
+        classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins, Top)
         
         # Calculate performance measures
         correct = 0
+        top_correct = 0
         for i in range(len(classified)):
-            if classified[i] == testc[i]:
+            best_classes = [x[0] for x in classified[i]]
+            #print testc[i], best_classes
+            #if classified[i] == testc[i]:
+            if len(best_classes) > 0 and best_classes[0] == testc[i]:
                 correct = correct + 1
+            if best_classes.count(testc[i]) > 0:
+                top_correct = top_correct + 1
         print 'A:', correct / float(len(testc))
+        print 'A (top ' + str(Top) + "): " + str(top_correct / float(len(testc)))
         

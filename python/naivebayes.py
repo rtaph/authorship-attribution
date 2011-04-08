@@ -1,5 +1,6 @@
 import numpy
 import math
+import operator
 
 def nb_train(data_classes, data, bins):
     '''
@@ -102,15 +103,15 @@ def nb_trainclass(features, bins):
       
     return fpf
 
-def nb_classify(cps, fcps, classes, data, bins):
+def nb_classify(cps, fcps, classes, data, bins, top=1):
     
     classified = []
     for d in data:
-        bestc, bestp = nb_classify_text(cps, fcps, d, bins)
-        classified.append(bestc)
+        best = nb_classify_text(cps, fcps, d, bins, top)
+        classified.append(best)
     return classified
 
-def nb_classify_text(cps, fcps, tfeat, bins):
+def nb_classify_text(cps, fcps, tfeat, bins, ntop=1):
     '''
     @param cps: Dict of prior class probabilities, key: class.
     @param fcps: Dict of dict of list of probabilities for each feature-bin.
@@ -118,41 +119,29 @@ def nb_classify_text(cps, fcps, tfeat, bins):
     @param tfeat: Features of a text to be classified
     @param bins: Feature-bins, defined by frequency upper-bounds
     
-    @return: A tuple c, p. c is the class that the tfeat most likely
-    occur in. p is the probability with which they occur.
+    @return: A list of tuples (class, log(p(class|tfeat))). List will
+    hold the ntop classes with best probability. 
     '''
-    #feature_bins = int(math.pow(10, D))
-    #nbins = len(bins) 
     
     # For each class: Find probability for each feature
     ps = {}
     for c in cps:
         cp = cps[c] # prior class probability
-        p = math.log(cp)
-        #p = cp
-        #print 'Before', cp, p
+        p = math.log(cp) # using log so we can use addition below
         for i in range(len(tfeat)):
             f = tfeat[i]
-            #print f
-            #bin = int(round(f,D) * feature_bins)
             bin = find_feat_bin(f, bins)
             fp = fcps[c][i][bin] # probability for feature belonging to class
-            #print 'class', c, 'feat', i, 'bin', bin, 'fp', fp
-            p = p + math.log(fp)
-            #p = p * fp
-        #print p
+            p = p + math.log(fp) # we can add log(p) instead of multiplying p
         ps[c] = p
     
     # Find highest probability and hereby most likely class
-    bestc = None
-    bestp = None
-    for c in ps:
-        p = ps[c] # probability for assigning text to class
-        if bestp is None or p > bestp: # found better probability
-            bestc = c
-            bestp = p
+    # Start by sorting by probability
+    sorted_ps = sorted(ps.iteritems(),key=operator.itemgetter(1),reverse=True)
     
-    return bestc, bestp
+    # Return the top probabilities
+    nbest = min([len(sorted_ps),ntop])
+    return sorted_ps[:nbest]
 
 def find_feat_bin(f, bins):
     '''

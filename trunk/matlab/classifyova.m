@@ -29,6 +29,9 @@ lambda = 1e-7;
 %testData = data(testIndices,:);
 %trainData = data(trainIndices,:);
 %trainClasses = classes(trainIndices);
+size(trainData);
+size(trainClasses);
+nClasses;
 [xsup,w,b,nbsv] = svmmulticlassoneagainstall(trainData,trainClasses,nClasses,c,lambda,kernel,kerneloption,false);
 
 for t=1:size(testData,1)

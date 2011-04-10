@@ -37,10 +37,12 @@ end
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.cat.txt');
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set10_10_2.out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set10_10_2.cat.txt');
-%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_050_10.out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_050_10.cat.txt');
-data = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.out.txt');
-classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.cat.txt');
+data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_005_10.out.txt');
+classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_005_10.cat.txt');
+%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char/b1_40_all.out.txt');
+%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char/b1_40_all.cat.txt');
+%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.out.txt');
+%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.cat.txt');
 %data = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.out.txt');
 %classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.cat.txt');
 
@@ -98,7 +100,7 @@ end
 
 
 tic;
-k = 5;
+k = 10;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nRealClasses,k); % precision per class
 classRecalls = zeros(nRealClasses,k); % recall per class
@@ -120,6 +122,9 @@ for i=1:k
     trainClasses = classes(trainIndices,:);
     trainData = data(trainIndices,:);
     testData = data(testIndices,:);
+    size(trainClasses);
+    size(trainData);
+    size(testData);
     %pause
     
     % TODO: We use "don't knows' in ava so this should be mentioned
@@ -180,26 +185,28 @@ alarmTrigger = 0.3;
 avgAccuracy = mean(accuracies);
 accuracies
 classPrecisions;
-avgClassPrecisions = meanwithnan(classPrecisions);
+avgClassPrecisions = meanwithnan(classPrecisions,2);
+avgFoldPrecisions = meanwithnan(classPrecisions,1)
 
 % Alarm if low precision found
 if sum(isnan(avgClassPrecisions)) > 0 || sum(avgClassPrecisions<=alarmTrigger) > 0
-    fprintf('!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!');
-    avgClassPrecisions
+    %fprintf('!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!');
+    %avgClassPrecisions
 end
-avgPrecision = meanwithnan(avgClassPrecisions')
+avgPrecision = meanwithnan(avgClassPrecisions',2);
 classRecalls;
-avgClassRecalls = meanwithnan(classRecalls);
+avgClassRecalls = meanwithnan(classRecalls,2);
+avgFoldRecalls = meanwithnan(classRecalls,1)
 
 % Alarm if low recall found
 if sum(isnan(avgClassRecalls)) > 0 || sum(avgClassRecalls<=alarmTrigger) > 0
-    fprintf('!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!');
-    avgClassRecalls
+    %fprintf('!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!');
+    %avgClassRecalls
 end
-avgRecall = meanwithnan(avgClassRecalls')
+avgRecall = meanwithnan(avgClassRecalls',2);
 classF1s;
-avgClassF1s = meanwithnan(classF1s);
-avgF1 = meanwithnan(avgClassF1s')
+avgClassF1s = meanwithnan(classF1s,2);
+avgF1 = meanwithnan(avgClassF1s',2);
 
 toc;
 

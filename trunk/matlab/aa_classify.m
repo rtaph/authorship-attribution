@@ -31,20 +31,16 @@ if runPython
     %classes = load(char(files(2)));
 end
 
-%data = load('/Users/epb/Documents/uni/kandidat/speciale/code/out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt');
-%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/almedad/150_3char_150_3wrd/a1_3_40_multi.cat.txt');
-%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set10_10_2.out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/set10_10_2.cat.txt');
-data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_005_10.out.txt');
-classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char_150_3wrd/a1_005_10.cat.txt');
-%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char/b1_40_all.out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/blogs/150_3char/b1_40_all.cat.txt');
-%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/personae/150_3char_150_3wrd/set20_20_1.cat.txt');
-%data = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.out.txt');
-%classes = load('/Users/epb/Documents/uni/kandidat/speciale/output/fed/150_3char_150_3wrd/all_single_quat_multi.cat.txt');
+outputFolder = '/home/epb/Documents/output/';
+%outputFolder = '/Users/epb/Documents/uni/kandidat/speciale/output/';
+
+outFile = 'personae/2000_3char/p2.out.txt'
+catFile = 'personae/2000_3char/p2.cat.txt'
+%outFile = '../code/out.txt'
+%catFile = '../code/cat.txt'
+
+data = load(strcat(outputFolder,outFile));
+classes = load(strcat(outputFolder,catFile));
 
 %data = data(:,1:3)
 %classes(1:30,:)
@@ -109,7 +105,7 @@ classF1s = zeros(nRealClasses,k); % F1-measure per class
 foldIndices = crossvalind('Kfold',classes,k);
 for i=1:k
     
-    %fprintf(strcat(['CV-iteration ', int2str(i), '\n']));
+    fprintf(strcat(['CV-iteration ', int2str(i), '\n']));
     
     % find indices of data/classes that will be used for training/test
     testIndices = (foldIndices == i);

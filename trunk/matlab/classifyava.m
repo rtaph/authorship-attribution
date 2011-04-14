@@ -32,7 +32,7 @@ votes = zeros(size(testData,1),nClasses);
 
 for c=1:nClasses
     for d=(c+1):nClasses
-        fprintf(strcat(['c,d: ', int2str(c), ',', int2str(d), '\n']));
+        %fprintf(strcat(['c,d: ', int2str(c), ',', int2str(d), '\n']));
         %cIndices = classes == c;
         %dIndices = classes == d;
         cIndices = trainClasses == c;
@@ -76,7 +76,8 @@ for c=1:nClasses
         
         
         try
-            options = optimset('maxiter',1000,'display','iter');
+            %options = optimset('maxiter',1000,'display','iter');
+            options = optimset('maxiter',1000);
             %tic;
             %svmStruct = svmtrain(trainData,trainClasses,'Kernel_Function',kernel,'quadprog_opts',options);
             svmStruct = svmtrain(cdTrainData,cdTrainClasses,'Kernel_Function',kernel,'quadprog_opts',options);

@@ -31,11 +31,16 @@ if runPython
     %classes = load(char(files(2)));
 end
 
-outputFolder = '/home/epb/Documents/output/';
-%outputFolder = '/Users/epb/Documents/uni/kandidat/speciale/output/';
+performanceFile = '/Users/epb/Documents/uni/kandidat/speciale/code/perf.csv'
+%performanceFile = '/home/epb/Documents/code/perf.csv'
 
-outFile = 'personae/2000_3char/p2.out.txt'
-catFile = 'personae/2000_3char/p2.cat.txt'
+%outputFolder = '/home/epb/Documents/output/';
+outputFolder = '/Users/epb/Documents/uni/kandidat/speciale/output/';
+
+%outFile = 'personae/300_3char/p2.out.txt'
+%catFile = 'personae/300_3char/p2.cat.txt'
+outFile = 'blogs/150_3char_150_3wrd/a1_005_10.out.txt'
+catFile = 'blogs/150_3char_150_3wrd/a1_005_10.cat.txt'
 %outFile = '../code/out.txt'
 %catFile = '../code/cat.txt'
 
@@ -96,7 +101,7 @@ end
 
 
 tic;
-k = 10;
+k = 4;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nRealClasses,k); % precision per class
 classRecalls = zeros(nRealClasses,k); % recall per class
@@ -181,7 +186,7 @@ alarmTrigger = 0.3;
 avgAccuracy = mean(accuracies);
 accuracies
 classPrecisions;
-avgClassPrecisions = meanwithnan(classPrecisions,2);
+avgClassPrecisions = meanwithnan(classPrecisions,2)
 avgFoldPrecisions = meanwithnan(classPrecisions,1)
 
 % Alarm if low precision found
@@ -191,7 +196,7 @@ if sum(isnan(avgClassPrecisions)) > 0 || sum(avgClassPrecisions<=alarmTrigger) >
 end
 avgPrecision = meanwithnan(avgClassPrecisions',2);
 classRecalls;
-avgClassRecalls = meanwithnan(classRecalls,2);
+avgClassRecalls = meanwithnan(classRecalls,2)
 avgFoldRecalls = meanwithnan(classRecalls,1)
 
 % Alarm if low recall found
@@ -201,9 +206,21 @@ if sum(isnan(avgClassRecalls)) > 0 || sum(avgClassRecalls<=alarmTrigger) > 0
 end
 avgRecall = meanwithnan(avgClassRecalls',2);
 classF1s;
-avgClassF1s = meanwithnan(classF1s,2);
+avgClassF1s = meanwithnan(classF1s,2)
+avgFoldF1s = (2*avgFoldPrecisions.*avgFoldRecalls)./(avgFoldPrecisions+avgFoldRecalls)
 avgF1 = meanwithnan(avgClassF1s',2);
 
 toc;
+
+% Write performance measures to file
+perf = nan(nClasses,7);
+perf(1:k,1) = accuracies';
+perf(1:k,2) = avgFoldPrecisions';
+perf(1:k,3) = avgFoldRecalls';
+perf(1:k,4) = avgFoldF1s';
+perf(:,5) = avgClassPrecisions;
+perf(:,6) = avgClassRecalls;
+perf(:,7) = avgClassF1s;
+csvwrite(performanceFile,perf);
 
 fprintf('\n------------------------- Done -------------------------\n\n');

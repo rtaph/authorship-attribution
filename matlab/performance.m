@@ -33,7 +33,7 @@ for c=1:nClasses
 end
 
 % We need to calculate F1 in a loop because precision and recall may be
-% both 0 for a class and this should give F1== not F1=NaN
+% both 0 for a class and this should give F1=0 not F1=NaN
 classF1s = zeros(nClasses,1);
 for c=1:nClasses
     p = classPrecisions(c);

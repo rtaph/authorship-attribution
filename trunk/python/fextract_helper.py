@@ -112,8 +112,8 @@ def create_ngram_feats(ngrams, text_ngrams):
     chars and words
     '''
     GT_SMOOTHING = False
-    GT_RENORM = False
-    GT_P0 = False
+    GT_RENORM = True
+    GT_P0 = True
     
     n_texts = len(text_ngrams)
     print os.getpid(), ": Creating n-grams features for", n_texts, "texts"
@@ -123,7 +123,8 @@ def create_ngram_feats(ngrams, text_ngrams):
     # Select char n-gram features
     for t in range(n_texts):
         freqs = FreqDist(text_ngrams[t])
-        print 'Text', t
+        print freqs.items()[:5]
+        #print 'Text', t
         
         if GT_SMOOTHING:
             
@@ -133,9 +134,11 @@ def create_ngram_feats(ngrams, text_ngrams):
             nrl = []
             for r in rl:
                 nrl.append(freqs.Nr(r))
+            #print rl
+            #print nrl
             
             # Find parameters for smoothed Nr
-            a, b, X = goodturing.gt_nr_est(rl, nrl)
+            a, b, X = goodturing.gt_nr_smooth(rl, nrl)
             N = freqs.N()
             p0_all = 1.0
             if N > 0: 
@@ -145,7 +148,7 @@ def create_ngram_feats(ngrams, text_ngrams):
             #print 'X', X
             
             
-            rsl = goodturing.gt_smoothing(rl, nrl, a, b, X)
+            rsl = goodturing.gt_r_est(rl, nrl, a, b, X)
             #print rsl
             # Nstar is the total number of objects, using estimated r
             Nstar = 0
@@ -155,10 +158,11 @@ def create_ngram_feats(ngrams, text_ngrams):
             #if Nstar == 0:
             #    print 'X', X
             #    print freqs.items()
-            # Calculate p0
+            
+            # Calculate p0 for unseen (r == 0) ngrams
             unseen = 0
             for ngram in ngrams:
-                if freqs[ngram] == 0:
+                if freqs[ngram] == 0: # This checks r == 0
                     unseen = unseen + 1
             if unseen > 0:
                 p0 = p0_all / float(unseen)   
@@ -178,7 +182,7 @@ def create_ngram_feats(ngrams, text_ngrams):
                 if r > 0: # GT smoothing for seen objects
                     rstar = rsl[r]
                     pr = rstar/float(N)
-                    print ngram, pr
+                    #print ngram, pr
                     # re-normalize probability
                     if GT_RENORM:
                         freq = (1-p0_all)*(rstar/Nstar)
@@ -187,12 +191,15 @@ def create_ngram_feats(ngrams, text_ngrams):
                 elif GT_P0:
                     freq = p0
                 
-                #print 'gtfreq', freq
+                # TODO: In personae, all word ngrams have freq = 0
+                #print ngram, freq
                 #if freqs[ngram] > 0 and a is not None and \
                 #b is not None and b <= -1:
-                #    freq = gt_smoothing(freqs, N, ngram, a, b, X)
+                #    freq = gt_r_est(freqs, N, ngram, a, b, X)
                 
             feature_matrix[t].append(freq)
+        
+        print sum(feature_matrix[t])
             
     #end = time.time()
     #print os.getpid(), ": Used", (end-start)/n_texts, "seconds per text"

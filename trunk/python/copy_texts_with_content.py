@@ -1,11 +1,7 @@
 '''
 Copy all text-files that has content from one folder to another.
 '''
-import nltk
 import os
-from math import sqrt
-from nltk.corpus import PlaintextCorpusReader
-import random
 import shutil
 
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/data_formatted5"
@@ -22,11 +18,6 @@ for f in files:
     if os.path.isfile(p) and f.endswith(".txt"):
         content = open(p,"r").read()
         if len(content) > 0:
-            #fr = os.path.join(corpus_root, t)
             to = os.path.join(output, f)
-            #print p, to
             print f
             shutil.copy(p, to)
-            
-            #if len(content) > 120000:
-            #    print f

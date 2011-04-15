@@ -1,12 +1,15 @@
 import os
 from nltk.corpus import PlaintextCorpusReader
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data"
-output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data_20"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data"
+#output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data_50"
 
-FRAGMENTS = 20
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_known"
+output_folder = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/F2"
 
-corpus = PlaintextCorpusReader(corpus_root, '.*', encoding="utf-8")
+FRAGMENTS = 100
+
+corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding="utf-8")
 n_texts = len(corpus.fileids())
 
 for text in corpus.fileids():

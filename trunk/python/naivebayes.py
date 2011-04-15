@@ -90,7 +90,6 @@ def nb_trainclass(features, bins):
         #for i in range(feature_bins):
         for i in range(nbins):
             if fb[i] != 0:
-                # TODO: Correct to divide by docs here?
                 pf[i] = (fb[i] / float(len(features))) - negp
                 if pf[i] <= 0:
                     pf[i] = minp
@@ -182,18 +181,13 @@ def build_feat_bins(features, b):
 #    print min, max, (max-min)/float(b)
 #    return numpy.arange(min,max,(max-min)/float(b)).tolist()
 
-    # New: Construct features so the average feature-value is in the middle bin
-    #N = len(features)*len(features[0])
-    #s = sum([sum(f) for f in features])    
-    #su = 0
-    #for t in features:
-    #    su = su + sum(t)
-            
+    # New: Construct features so the average feature-value is in the middle bin            
     avg = sum([sum(f) for f in features]) / float(len(features)*len(features[0]))
-    #print 'avg', avg
+    print 'avg', avg
+    print avg / float(b)
     interval = avg / float(b) * 2 # b/2 bins on each side of the avg
-    #print 'interval', interval 
+    print 'interval', interval, interval*(b/float(2)) 
     
-    return numpy.arange(interval,avg+(((b/2)+1)*interval),interval).tolist()
+    return numpy.arange(interval,avg+(((b/2.0)+1)*interval),interval).tolist()
         
     

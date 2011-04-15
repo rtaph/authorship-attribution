@@ -1,10 +1,10 @@
 import math
 import util
 
-def gt_smoothing(rl, nrl, a, b, X):
+def gt_r_est(rl, nrl, a, b, X):
     '''
-    Good-Turing smoothing: Find r* for all r>=1
-    @param rl: Integer-list of frequencies (r)
+    Good-Turing smoothing: Find r* estimates for all r>=1
+    @param rl: Integer-list of frequencies, r where r >= 1
     @param nrl: List of integer-frequencies of frequencies (Nr)
     @param a, b: Parameters of linear regression log(Nr) = a + b*log(r) that
     estimate Nr
@@ -17,8 +17,8 @@ def gt_smoothing(rl, nrl, a, b, X):
     for i in range(len(rl)):
         
         r = rl[i]
-        nr = nrl[i]
-        nr1 = 0
+        nr = nrl[i] # Nr
+        nr1 = 0 # The next Nr
         if i < len(rl)-1:
             nr1 = nrl[i+1]
         
@@ -28,19 +28,21 @@ def gt_smoothing(rl, nrl, a, b, X):
             if r+1 >= X:
                 nr1 = math.pow(10, a + (b*math.log10(r+1)))
     
+        # TODO: Is this right for r in short list of r's?
         rstar = (r+1) * (nr1/float(nr)) # calculate r*
         if rstar > 0:
             rsl[r] = rstar
         else:
             rsl[r] = r # Occurs when too few seen objects
-                
+    
+    #print rsl
     return rsl
 
-def gt_nr_est(rl, nrl):
+def gt_nr_smooth(rl, nrl):
     '''
     Smooth Nr-parameter for Good-Turing smoothing
     @param rl: Integer-list of frequencies (r)
-    @param nrl: List of integer-frequencies of frequencies (Nr)
+    @param nrl: List of integer-frequencies of frequencies (Nr), non-zero
     @return: a, b, X for a linear regression of log(Nr) = a + b*log(r)
     and X is the first r-value to start using smoothed nr's
     '''
@@ -54,6 +56,7 @@ def gt_nr_est(rl, nrl):
         nr = nrl[i]
         if i > 0 and i < len(rl)-1:
             zr = (2*nr)/float(rl[i+1]-rl[i-1])
+            #print zr
             logzr.append(math.log10(zr))
     logr = [math.log10(x) for x in rl[1:len(rl)-1]]
     a, b = util.slr(logr, logzr)
@@ -83,3 +86,8 @@ def gt_nr_est(rl, nrl):
             break
     
     return a, b, X
+
+# TEST
+#rl = [1,2,3,4,5,6,7,400,1918]
+#nrl = [268,112,70,41,24,14,15,1,1]
+#print gt_nr_smooth(rl, nrl)

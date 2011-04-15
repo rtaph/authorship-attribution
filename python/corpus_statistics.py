@@ -4,10 +4,10 @@ Statistics about a given corpus
 from math import sqrt
 from nltk.corpus import PlaintextCorpusReader
 
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/set20_20_1"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dark_web_forum_portal/almedad/temp4"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_27_all"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data_50"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/F3"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/all_known"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/B1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 
 corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding="UTF-8")
@@ -19,8 +19,6 @@ text_classes = []
 DISTINCT_AUTHORS = True
 TEXT_STATS = True
 
-# TODO: Add possiblity to not count urlLink etc.
-
 for text in corpus.fileids():
     
     if DISTINCT_AUTHORS:
@@ -31,18 +29,21 @@ for text in corpus.fileids():
     if TEXT_STATS:
         wrd_tokens = corpus.words(text)
         
+        l = 0
         if len(corpus.raw(text)) > 0 and len(wrd_tokens) > 0:
-            lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
-            #for bla in wrd_tokens[:10]:
-            #    print ord(unicode(bla))
-            #print len(corpus.raw(text))
-            #print len(lower_wrds)
-            if len(lower_wrds) > 0:
-                txt_lengths.append(len(lower_wrds))
+            
+            l = len(wrd_tokens)
+            
+            #lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
+            
+            #if len(lower_wrds) > 0:
+            #    l = len(lower_wrds)
             #else:
             #    print text
+            
         else:
-            txt_lengths.append(0)
+            print text
+        txt_lengths.append(l)
             
         if len(txt_lengths) % 100 == 0:
             print len(txt_lengths)

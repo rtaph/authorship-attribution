@@ -35,15 +35,20 @@ def load_wrds(dir, cmt="//"):
             f.close()
     return wrds
 
-def char_ngram_stats(texts, corpus, n_char_ngrams, char_ngram_size):
+def char_ngram_stats(texts, corpus, order, include_lower=False):
     '''
-    Original version of extracting n-grams: Returns a list
-    of all n-grams across all texts and a matrix with a list of
-    n-grams per text
+    Find character n-grams in some texts.
+    @param texts: List of texts
+    @param corpus: The corpus that holds the texts
+    @param order: The order of the n-grams to consider.
+    @param include_lower: Whether to include list of lower-order n-grams in output
+    @return: A tuple: First element is a list of all n-grams (only of
+    given order) across all texts. Second element is a a matrix with a list of
+    lists of 1-grams, 2-grams, ..., n-grams per text.
     ''' 
     
     all_char_ngrams = [] # All n-grams found in entire corpus
-    text_char_ngrams = [] # The frequency of char n-grams found in each text
+    text_char_ngrams = [] # Char n-grams found in each text
     
     for text in texts:
         #print text
@@ -53,16 +58,30 @@ def char_ngram_stats(texts, corpus, n_char_ngrams, char_ngram_size):
         
         empty = len(corpus.raw(text)) == 0 
     
+        # One list per n
+        text_ngrams = []
+        for _ in range(order):
+            text_ngrams.append([])
+            
         if not empty:
             text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-            char_ng = ngrams(text_str, char_ngram_size)
-            text_char_ngrams.append(char_ng)
-            all_char_ngrams.extend(char_ng)
-        else:
-            text_char_ngrams.append([])
+            
+            if include_lower:
+                for n in range(1, order+1):
+                    char_ng = ngrams(text_str, n)
+                    text_ngrams[n-1] = char_ng
+                    if n == order:
+                        all_char_ngrams.extend(char_ng)
+            else:
+                char_ng = ngrams(text_str, order)
+                text_ngrams[order-1] = char_ng
+                all_char_ngrams.extend(char_ng)
+            
+        text_char_ngrams.append(text_ngrams)
             
     return all_char_ngrams, text_char_ngrams
 
+# TODO: Only used for multi-version
 def get_text_cngs(texts, corpus_root, ngram_size):
     '''
     For each text, get a list of all char n-grams occurring the text
@@ -84,6 +103,7 @@ def get_text_cngs(texts, corpus_root, ngram_size):
             
     return ngs
 
+# TODO: Only used for multi-version
 def get_cngs(texts, corpus_root, ngram_size):
     '''
     Get a list of all char n-grams occurring in some texts
@@ -105,11 +125,13 @@ def get_cngs(texts, corpus_root, ngram_size):
     return ngs 
 
     
-def create_ngram_feats(ngrams, text_ngrams):
+def create_ngram_feats(ngrams, order, text_ngrams, cg_representation=False):
     '''
     Create n-gram features for each text, using the list of n-grams
     to consider given in ngrams argument. Can be used for both
     chars and words
+    @param order: Size of n-gram, where order > 1
+    @param cg_representation: The probability of an ngram is calculated as in CG98
     '''
     GT_SMOOTHING = False
     GT_RENORM = True
@@ -122,9 +144,13 @@ def create_ngram_feats(ngrams, text_ngrams):
     #start = time.time()
     # Select char n-gram features
     for t in range(n_texts):
-        freqs = FreqDist(text_ngrams[t])
-        print freqs.items()[:5]
-        #print 'Text', t
+        
+        # Frequencies for n-gram
+        freqs = FreqDist(text_ngrams[t][order-1])
+        
+        # Frequencies for n-1-gram
+        if cg_representation:
+            lowerord_fd = FreqDist(text_ngrams[t][order-2])
         
         if GT_SMOOTHING:
             
@@ -172,7 +198,17 @@ def create_ngram_feats(ngrams, text_ngrams):
         # relative frequency for each n-gram in each text 
         for ngram in ngrams:
             
-            freq = freqs.freq(ngram)
+            if cg_representation:
+                freq = 0
+                occurrences = freqs[ngram]
+                if occurrences > 0:
+                    lowerord_ng = ngram[:-1]
+                    c_sum = lowerord_fd[lowerord_ng]
+                    #print ngram, lowerord_ng, occurrences, c_sum
+                    freq = occurrences / float(c_sum)
+                print freq, freqs.freq(ngram)
+            else:
+                freq = freqs.freq(ngram)
             
             #if freq == 0:
             #    unseen = unseen + 1
@@ -199,7 +235,7 @@ def create_ngram_feats(ngrams, text_ngrams):
                 
             feature_matrix[t].append(freq)
         
-        print sum(feature_matrix[t])
+        #print sum(feature_matrix[t])
             
     #end = time.time()
     #print os.getpid(), ": Used", (end-start)/n_texts, "seconds per text"
@@ -207,6 +243,7 @@ def create_ngram_feats(ngrams, text_ngrams):
     return feature_matrix
 
 
+# TODO: Has only been used for baseline tests
 def wrd_ngram_stats(texts, corpus, n_wrd_ngrams, wrd_ngram_size):
     n_texts = len(texts)
     feature_matrix = [[] for i in range(n_texts)]
@@ -232,7 +269,7 @@ def wrd_ngram_stats(texts, corpus, n_wrd_ngrams, wrd_ngram_size):
             
     return all_wd_ngrams, text_wrd_ngrams
    
-
+# TODO: Not used(?)
 def extract_fws(texts, corpus, fw_root):
     n_texts = len(texts)
     feature_matrix = [[] for i in range(n_texts)]
@@ -257,6 +294,7 @@ def extract_fws(texts, corpus, fw_root):
             
     return func_wrds, text_fws
 
+# TODO: Not used(?)
 def create_fw_features(func_words, text_fws):
     print "Attaching function words to list of features"
     n_texts = len(text_fws)

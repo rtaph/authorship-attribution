@@ -4,32 +4,23 @@ import util
 from nltk.probability import FreqDist
 from nltk.corpus import PlaintextCorpusReader
 import csv
+import util
 
 n_char_ngrams = 150
 char_ngram_size = 3
 
 NBINS = 10
 
-CV_K = 4
+CG_REPRESENTATION = True
+
+CV_K = 10
 
 top=10
 
 PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb.csv"
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
-
-def avgwith_none(l):
-    suml = 0
-    avgl = None
-    totl = 0 
-    for x in l:
-        if x != None:
-            suml = suml + x
-            totl = totl + 1
-    if totl > 0:
-        avgl = suml / float(totl)
-    return avgl
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
 
 if __name__ == '__main__':
     
@@ -40,7 +31,7 @@ if __name__ == '__main__':
     distinct_classes = list(set(text_classes))  
     
     print 'Finding ngrams in texts...'
-    all_ngrams, text_ngrams = fextract_helper.char_ngram_stats(texts, corpus, n_char_ngrams, char_ngram_size)
+    all_ngrams, text_ngrams = fextract_helper.char_ngram_stats(texts, corpus, char_ngram_size,CG_REPRESENTATION)
     
     # Determine features
     print 'Finding most frequent n-grams...'
@@ -55,9 +46,23 @@ if __name__ == '__main__':
     features = []
     for t in text_ngrams:
         myfeats = [] # features for the current text
-        freqdist = FreqDist(t)
+        freqdist = FreqDist(t[char_ngram_size-1])
+        #print freqdist
+        if CG_REPRESENTATION:
+            lowerord_fd = FreqDist(t[char_ngram_size-2])
+            #print lowerord_fd
         for f in mostfreqngs:
-            myfeats.append(freqdist.freq(f))
+            if CG_REPRESENTATION:
+                freq = 0
+                occurrences = freqdist[f]
+                if occurrences > 0:
+                    lowerord_ng = f[:-1]
+                    #print lowerord_ng
+                    c_sum = lowerord_fd[lowerord_ng]
+                    freq = occurrences / float(c_sum)
+                myfeats.append(freq)
+            else:
+                myfeats.append(freqdist.freq(f))
         features.append(myfeats)
     
     # Find feature-value bins
@@ -157,9 +162,9 @@ if __name__ == '__main__':
             
         # Average precision, recall and f1 for fold
         print foldp, foldr, foldf1
-        avgfoldp = avgwith_none(foldp)
-        avgfoldr = avgwith_none(foldr)
-        avgfoldf1 = avgwith_none(foldf1)
+        avgfoldp = util.avgwith_none(foldp)
+        avgfoldr = util.avgwith_none(foldr)
+        avgfoldf1 = util.avgwith_none(foldf1)
         print 'Avg. P:', format(100*avgfoldp,'.2f')
         print 'Avg. R:', format(100*avgfoldr,'.2f')
         print 'Avg. F1:', format(100*avgfoldf1,'.2f')
@@ -172,12 +177,17 @@ if __name__ == '__main__':
     # Average class precision, recall and f1 for each class
     for i in range(len(class_p)):
         c = class_p.keys()[i]
-        avgcp = avgwith_none(class_p[c])
-        avgcr = avgwith_none(class_r[c])        
+        avgcp = util.avgwith_none(class_p[c])
+        avgcr = util.avgwith_none(class_r[c])        
         print c, avgcp, avgcr
         perf[i][4] = avgcp
         perf[i][5] = avgcr
-        perf[i][6] = (2*avgcp*avgcr) / float(avgcp+avgcr)
+        f1 = None
+        if avgcp == 0 and avgcr == 0:
+            f1 = 0
+        elif avgcp is not None and r is not None:
+            f1 = (2*avgcp*avgcr) / float(avgcp+avgcr)
+        perf[i][6] = f1 
     
     # ----- Write performance measures to file ----- #
     pf = open(PERFORMANCE_FILE,'w')

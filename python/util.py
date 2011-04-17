@@ -27,7 +27,6 @@ def k_fold_cv_ind(classes, K):
         bla.append((classes[i],i))
     
     sorted_bla = sorted(bla,key=operator.itemgetter(0))
-    #print sorted_bla
     
     ind = [0 for i in range(len(classes))]
     x = 0
@@ -36,66 +35,19 @@ def k_fold_cv_ind(classes, K):
         ind[k] = x
         x = (x + 1) % K
         
-    #print ' ---', classes
-    #print ' ---', ind
     return ind
-#    
-#    psize_min = len(classes) / K
-#    psize_max = psize_min + (len(classes) % K)
-#    print 'psize', psize_min, psize_max
-#    prev_count = 0
-    
-#    bins = [{'indices': [], 'classcounts': []} for i in range(K)]
-#    next_bin = 0
-#    
-#    psize_max = psize_min + (len(classes) % K)
-#    i = 0
-#    c = 0
-#    while c < len(classes):
-#        cl = classes[i]
-#        if bins[next_bin]
 
-
-#    sortedcl = sorted(classes)
-#    print sortedcl
-#    
-#    distinct = list(set(classes))
-#    cind = {}
-#    for i in range(len(classes)):
-#        c = classes[i]
-#        if not cind.has_key(c):
-#            cind[c] = 0
-#        cind[c] = cind[c] + 1 
-#    
-#    for c in cind:
-#        len(classes) / K
-    
-    
-    
-#    next = {}
-#    for c in distinct:
-#        next[c] = 0
-#        
-#    ind = []
-##    c_ind = {}
-#    for i in range(len(classes)):
-#        c = classes[i]
-##        if not c_ind.has_key(c):
-##            c_ind[c] = []
-##        c_ind[c].append(i)
-#        ind.append(next[c])
-#        next[c] = (next[c] + 1) % K
-#    #print c_ind
-#    #for c in c_ind:
-#          
-#    return ind 
-    
-    #for k in xrange(K):
-    #    training = [x for i, x in enumerate(X) if i % K != k]
-    #    validation = [x for i, x in enumerate(X) if i % K == k]
-    #    yield training, validation
-    
-    
+def avgwith_none(l):
+    suml = 0
+    avgl = None
+    totl = 0 
+    for x in l:
+        if x != None:
+            suml = suml + x
+            totl = totl + 1
+    if totl > 0:
+        avgl = suml / float(totl)
+    return avgl
   
 # TEST
 #k = 4

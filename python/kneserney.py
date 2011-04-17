@@ -72,6 +72,8 @@ def modkn(ngram, ngram_freqdists):
     Modified Kneser-Ney.
     Calculate probability for an ngram
     @param ngram: The n-gram to calculate probability for.
+    @param ngram_freqdists: List of frequency distributions for 1-grams,
+    2-grams, ..., n-grams for a text.
     '''
     
     print 'ngram', ngram
@@ -132,7 +134,9 @@ if __name__ == '__main__':
     for ng in ngrams(text,3):
         pkn = modkn(ng, ng_freqdists)
         print 'pKN:', pkn
-        print 'p:  ', ng_freqdists[2].freq(ng)
+        csum = ng_freqdists[1][ng[:-1]]
+        #print 'p:  ', ng_freqdists[2].freq(ng)
+        print 'p:  ', ng_freqdists[2][ng] / float(csum)
         #bla = bla + ng_freqdists[2].freq(ng)
         print '------------------------\n\n\n'
     

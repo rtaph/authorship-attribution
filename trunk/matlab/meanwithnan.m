@@ -1,11 +1,11 @@
 function means = meanwithnan(samples,dim)
-% Calculate row-wise mean of a matrix, taking into account that some values
-% in matrix may be NaN.
+% Calculate row-wise or column-wise mean of a matrix,
+% taking into account that some values in matrix may be NaN.
 
 [n, k] = size(samples);
 
 if sum(sum(isnan(samples))) == 0
-    means = mean(samples,dim);
+    means = mean(samples,dim); % no NaNs
 end
 
 if dim == 1

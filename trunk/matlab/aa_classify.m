@@ -37,34 +37,18 @@ performanceFile = '/Users/epb/Documents/uni/kandidat/speciale/code/perf.csv'
 %outputFolder = '/home/epb/Documents/output/';
 outputFolder = '/Users/epb/Documents/uni/kandidat/speciale/output/';
 
-%outFile = 'personae/300_3char/p2.out.txt'
-%catFile = 'personae/300_3char/p2.cat.txt'
-outFile = 'blogs/150_3char_150_3wrd/a1_005_10.out.txt'
-catFile = 'blogs/150_3char_150_3wrd/a1_005_10.cat.txt'
+%outFile = 'personae/1000_3char/p2.out.txt'
+%catFile = 'personae/1000_3char/p2.cat.txt'
+outFile = 'blogs/150_3char/b1_40_all.out.txt'
+catFile = 'blogs/150_3char/b1_40_all.cat.txt'
 %outFile = '../code/out.txt'
 %catFile = '../code/cat.txt'
 
 data = load(strcat(outputFolder,outFile));
 classes = load(strcat(outputFolder,catFile));
 
-%data = data(:,1:3)
-%classes(1:30,:)
-%data(1:30,1:10)
-%y = pdist(data);
-%z = linkage(y);
-%[H,T] = dendrogram(z,'colorthreshold','default');
-%pause;
-
-%plot(data(classes==1,1),data(classes==1,2),'r.','MarkerSize',12)
-%hold on
-%plot(data(classes==2,1),data(classes==2,2),'b.','MarkerSize',12)
-%plot(ctrs(:,1),ctrs(:,2),'kx',...
-%    'MarkerSize',12,'LineWidth',2)
-%plot(ctrs(:,1),ctrs(:,2),'ko',...
-%    'MarkerSize',12,'LineWidth',2)
-%legend('Cluster 1','Cluster 2','Centroids',...
-%      'Location','NW')
-%pause
+size(data)
+size(classes)
 
 nClasses = max(classes)
 nRealClasses = nClasses;
@@ -101,7 +85,7 @@ end
 
 
 tic;
-k = 4;
+k = 10;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nRealClasses,k); % precision per class
 classRecalls = zeros(nRealClasses,k); % recall per class

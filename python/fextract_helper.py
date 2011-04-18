@@ -125,17 +125,18 @@ def get_cngs(texts, corpus_root, ngram_size):
     return ngs 
 
     
-def create_ngram_feats(ngrams, order, text_ngrams, cg_representation=False):
+def create_ngram_feats(ngrams, order, text_ngrams, cg_representation=False, kn_smooth=False, gt_smooth=False, gt_renorm=True, gt_p0=True):
     '''
     Create n-gram features for each text, using the list of n-grams
     to consider given in ngrams argument. Can be used for both
     chars and words
     @param order: Size of n-gram, where order > 1
     @param cg_representation: The probability of an ngram is calculated as in CG98
+    @param kn_smooth: Whether to use Kneser-Ney smoothing
     '''
-    GT_SMOOTHING = False
-    GT_RENORM = True
-    GT_P0 = True
+    
+    # We can only use one kind of smoothing
+    assert not(kn_smooth and gt_smooth)
     
     n_texts = len(text_ngrams)
     print os.getpid(), ": Creating n-grams features for", n_texts, "texts"
@@ -149,10 +150,15 @@ def create_ngram_feats(ngrams, order, text_ngrams, cg_representation=False):
         freqs = FreqDist(text_ngrams[t][order-1])
         
         # Frequencies for n-1-gram
-        if cg_representation:
-            lowerord_fd = FreqDist(text_ngrams[t][order-2])
+        if cg_representation or kn_smooth:
+            allfreqdists = []
+            for l in text_ngrams[t]:
+                allfreqdists.append(FreqDist(l))
+            #lowerord_fd = FreqDist(text_ngrams[t][order-2])
         
-        if GT_SMOOTHING:
+        if gt_smooth:
+            
+            # TODO: Gt smoothing does not use CG representation
             
             # Frequencies
             rl = sorted(list(set(freqs.values()))) # list of r
@@ -203,28 +209,29 @@ def create_ngram_feats(ngrams, order, text_ngrams, cg_representation=False):
                 occurrences = freqs[ngram]
                 if occurrences > 0:
                     lowerord_ng = ngram[:-1]
-                    c_sum = lowerord_fd[lowerord_ng]
+                    c_sum = allfreqdists[order-2][lowerord_ng]
                     #print ngram, lowerord_ng, occurrences, c_sum
                     freq = occurrences / float(c_sum)
-                print freq, freqs.freq(ngram)
+                if ngram == (u't', u'h', u'e'):
+                    print ngram, occurrences, c_sum, freq, freqs.freq(ngram)
             else:
                 freq = freqs.freq(ngram)
             
             #if freq == 0:
             #    unseen = unseen + 1
             #print 'freq', freq
-            if GT_SMOOTHING:
+            if gt_smooth:
                 r = freqs[ngram]
                 if r > 0: # GT smoothing for seen objects
                     rstar = rsl[r]
                     pr = rstar/float(N)
                     #print ngram, pr
                     # re-normalize probability
-                    if GT_RENORM:
+                    if gt_renorm:
                         freq = (1-p0_all)*(rstar/Nstar)
                     else:
                         freq = pr
-                elif GT_P0:
+                elif gt_p0:
                     freq = p0
                 
                 # TODO: In personae, all word ngrams have freq = 0

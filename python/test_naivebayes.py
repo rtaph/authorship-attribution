@@ -5,13 +5,15 @@ from nltk.probability import FreqDist
 from nltk.corpus import PlaintextCorpusReader
 import csv
 import util
+import kneserney
 
-n_char_ngrams = 150
+n_char_ngrams = 1000
 char_ngram_size = 3
 
 NBINS = 10
 
 CG_REPRESENTATION = True
+KN_SMOOTHING = True
 
 CV_K = 10
 
@@ -26,6 +28,8 @@ if __name__ == '__main__':
     
     corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
     texts = corpus.fileids()
+    #for t in texts:
+    #    print t
     text_classes = fextract_helper.find_classes(texts)
     ntexts = len(texts)
     distinct_classes = list(set(text_classes))  
@@ -46,23 +50,27 @@ if __name__ == '__main__':
     features = []
     for t in text_ngrams:
         myfeats = [] # features for the current text
-        freqdist = FreqDist(t[char_ngram_size-1])
+        freqdists = []
+        for l in t:
+            freqdists.append(FreqDist(l))
         #print freqdist
-        if CG_REPRESENTATION:
-            lowerord_fd = FreqDist(t[char_ngram_size-2])
-            #print lowerord_fd
+        #if CG_REPRESENTATION:
+        #    lowerord_fd = FreqDist(t[char_ngram_size-2])
+        #    #print lowerord_fd
         for f in mostfreqngs:
-            if CG_REPRESENTATION:
+            if KN_SMOOTHING:
+                freq = kneserney.modkn(f, freqdists)
+            elif CG_REPRESENTATION:
                 freq = 0
-                occurrences = freqdist[f]
+                occurrences = freqdists[char_ngram_size-1][f]
                 if occurrences > 0:
                     lowerord_ng = f[:-1]
                     #print lowerord_ng
-                    c_sum = lowerord_fd[lowerord_ng]
+                    c_sum = freqdists[char_ngram_size-2][lowerord_ng]
                     freq = occurrences / float(c_sum)
                 myfeats.append(freq)
             else:
-                myfeats.append(freqdist.freq(f))
+                myfeats.append(freqdists[char_ngram_size-1].freq(f))
         features.append(myfeats)
     
     # Find feature-value bins
@@ -182,12 +190,12 @@ if __name__ == '__main__':
         print c, avgcp, avgcr
         perf[i][4] = avgcp
         perf[i][5] = avgcr
-        f1 = None
+        avgcf1 = None
         if avgcp == 0 and avgcr == 0:
-            f1 = 0
+            avgcf1 = 0
         elif avgcp is not None and r is not None:
-            f1 = (2*avgcp*avgcr) / float(avgcp+avgcr)
-        perf[i][6] = f1 
+            avgcf1 = (2*avgcp*avgcr) / float(avgcp+avgcr)
+        perf[i][6] = avgcf1 
     
     # ----- Write performance measures to file ----- #
     pf = open(PERFORMANCE_FILE,'w')

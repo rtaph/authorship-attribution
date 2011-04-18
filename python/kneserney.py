@@ -76,7 +76,7 @@ def modkn(ngram, ngram_freqdists):
     2-grams, ..., n-grams for a text.
     '''
     
-    print 'ngram', ngram
+    print 'ngram', ngram, ngram[:-1]
     order = len(ngram) # order of given n-gram
     ngs = ngram_freqdists[order-1] # freq. dist for the ngrams of same order
     #print 'ngs', ngs
@@ -91,30 +91,34 @@ def modkn(ngram, ngram_freqdists):
         
         # c
         c = ngs[ngram]
-        #print 'c', c
+        print 'c', c
         
         # Count of history
         lowerorder_ngs = ngram_freqdists[order-2]
+        print lowerorder_ngs, lowerorder_ngs[ngram[:-1]], lowerorder_ngs[ngram[1:]] 
         csum = lowerorder_ngs[ngram[:-1]]
         #print 'csum', csum
         
-        # Discount, d
-        d, d1, d2, d3 = calc_discount(ngram, c, ngs)
-        #print 'd', d, 'd1', d1, 'd2', d2, 'd3', d3
-        
-        # N1, N2, N3
-        #print ngs.samples()
-        N1, N2, N3 = calcbigns(ngram, ngs)
-        #print 'N1', N1, 'N2', N2, 'N3', N3
-        
-        # Gamma
-        gamma = ((d1*N1)+(d2*N2)+(d3*N3))/float(csum)
-        #print 'gamma', gamma
-        
-        # Interpolated probability
-        myp = ((c-d)/float(csum))
-        print 'myp', myp
-        return myp + (gamma*modkn(ngram[1:],ngram_freqdists))
+        if csum > 0:
+            # Discount, d
+            d, d1, d2, d3 = calc_discount(ngram, c, ngs)
+            #print 'd', d, 'd1', d1, 'd2', d2, 'd3', d3
+            
+            # N1, N2, N3
+            #print ngs.samples()
+            N1, N2, N3 = calcbigns(ngram, ngs)
+            #print 'N1', N1, 'N2', N2, 'N3', N3
+            
+            # Gamma
+            gamma = ((d1*N1)+(d2*N2)+(d3*N3))/float(csum)
+            print 'gamma', gamma
+            
+            # Interpolated probability
+            myp = ((c-d)/float(csum))
+            print 'myp', myp
+            return myp + (gamma*modkn(ngram[1:],ngram_freqdists))
+        else:
+            return 0 # TODO: Or return modkn(ngram[1:],ngram_freqdists) ????
         
     
 if __name__ == '__main__':

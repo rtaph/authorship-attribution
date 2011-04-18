@@ -39,8 +39,8 @@ outputFolder = '/Users/epb/Documents/uni/kandidat/speciale/output/';
 
 %outFile = 'personae/1000_3char/p2.out.txt'
 %catFile = 'personae/1000_3char/p2.cat.txt'
-outFile = 'blogs/150_3char/b1_40_all.out.txt'
-catFile = 'blogs/150_3char/b1_40_all.cat.txt'
+outFile = 'blogs/150_3char_150_3wrd/a1_005_10.out.txt'
+catFile = 'blogs/150_3char_150_3wrd/a1_005_10.cat.txt'
 %outFile = '../code/out.txt'
 %catFile = '../code/cat.txt'
 
@@ -85,11 +85,11 @@ end
 
 
 tic;
-k = 10;
+k = 4;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nRealClasses,k); % precision per class
 classRecalls = zeros(nRealClasses,k); % recall per class
-classF1s = zeros(nRealClasses,k); % F1-measure per class
+%classF1s = zeros(nRealClasses,k); % F1-measure per class
 
 foldIndices = crossvalind('Kfold',classes,k);
 for i=1:k
@@ -159,7 +159,7 @@ for i=1:k
     accuracies(i) = a;
     classPrecisions(:,i) = cp;
     classRecalls(:,i) = cr;
-    classF1s(:,i) = cf;
+    %classF1s(:,i) = cf;
 
 end
 
@@ -169,7 +169,7 @@ alarmTrigger = 0.3;
 % Catch NaNs in precisions and recalls if necessary
 avgAccuracy = mean(accuracies);
 accuracies
-classPrecisions;
+classPrecisions
 avgClassPrecisions = meanwithnan(classPrecisions,2)
 avgFoldPrecisions = meanwithnan(classPrecisions,1)
 
@@ -179,7 +179,7 @@ if sum(isnan(avgClassPrecisions)) > 0 || sum(avgClassPrecisions<=alarmTrigger) >
     %avgClassPrecisions
 end
 avgPrecision = meanwithnan(avgClassPrecisions',2);
-classRecalls;
+classRecalls
 avgClassRecalls = meanwithnan(classRecalls,2)
 avgFoldRecalls = meanwithnan(classRecalls,1)
 
@@ -189,10 +189,23 @@ if sum(isnan(avgClassRecalls)) > 0 || sum(avgClassRecalls<=alarmTrigger) > 0
     %avgClassRecalls
 end
 avgRecall = meanwithnan(avgClassRecalls',2);
-classF1s;
-avgClassF1s = meanwithnan(classF1s,2)
-avgFoldF1s = (2*avgFoldPrecisions.*avgFoldRecalls)./(avgFoldPrecisions+avgFoldRecalls)
-avgF1 = meanwithnan(avgClassF1s',2);
+
+% F1 is calculated from the averages of precisions and recalls
+
+%classF1s
+%avgClassF1s = meanwithnan(classF1s,2)
+avgClassF1s = nan(nClasses,1);
+for i=1:nClasses
+    avgClassF1s(i) = f1(avgClassPrecisions(i), avgClassRecalls(i));
+end
+avgFoldF1s = nan(1,k);
+avgClassF1s
+for i=1:k
+    avgFoldF1s(i) = f1(avgFoldPrecisions(i),avgFoldRecalls(i));
+end
+avgFoldF1s
+%avgFoldF1s = (2*avgFoldPrecisions.*avgFoldRecalls)./(avgFoldPrecisions+avgFoldRecalls)
+%avgF1 = meanwithnan(avgClassF1s',2);
 
 toc;
 
@@ -208,3 +221,13 @@ perf(:,7) = avgClassF1s;
 csvwrite(performanceFile,perf);
 
 fprintf('\n------------------------- Done -------------------------\n\n');
+
+
+function f = f1(p,r)
+f = nan;
+if p == 0 && r == 0
+    f = 0;
+elseif ~isnan(p) && ~isnan(r)
+    f = (2*p*r) / (p+r);
+end
+

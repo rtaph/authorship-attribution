@@ -32,11 +32,11 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_40_all"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_6"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/all"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/all"
 
 
 #st_file = open(STATUS_FILE,"w")
@@ -108,10 +108,15 @@ if char_ngrams:
                                             char_ngram_size, CG_REPR or KN_SMOOTH)
     e1 = time.time()
     print 'Finding took', e1-s1, 'seconds'
+    #print a.items()[:10]
+    #for bla in t:
+    #    for b in bla:
+    #        print b.items()[:20]
     s1 = time.time()
-    freqs = FreqDist(a)
-    tot_cngs = min([n_char_ngrams, freqs.B()])
-    mostfreq_ngs = freqs.keys()[:tot_cngs]
+    #freqs = FreqDist(a)
+    #tot_cngs = min([n_char_ngrams, freqs.B()])
+    tot_cngs = min([n_char_ngrams, a.B()])
+    mostfreq_ngs = a.keys()[:tot_cngs]
     e1 = time.time()
     print 'Calc took', e1-s1, 'seconds'
     #feat_charngram = fextract_helper.create_char_ngrams(n_char_ngrams, a, t)
@@ -121,6 +126,8 @@ if char_ngrams:
                                                         GT_RENORM, GT_P0)
     e1 = time.time()
     print 'Creating took', e1-s1, 'seconds'
+    
+    
 if wrd_ngrams:
     a, t = fextract_helper.wrd_ngram_stats(corpus.fileids(), corpus, n_char_ngrams, char_ngram_size)
     freqs = FreqDist(a)

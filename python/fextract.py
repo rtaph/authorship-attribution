@@ -18,7 +18,7 @@ FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zl
 
 CG_REPR = True
 KN_SMOOTH = False
-GT_SMOOTH = False
+GT_SMOOTH = True
 GT_RENORM = True
 GT_P0 = True
 
@@ -88,6 +88,8 @@ while a < len(sys.argv):
     
 print "Corpus is", corpus_root
 #st_file.write("Corpus is " + corpus_root + "\n")
+
+print 'Prob. of n-grams depend on history:', CG_REPR
 
 start = time.time()
 

@@ -1,10 +1,10 @@
 from nltk.util import ngrams
-from nltk.probability import FreqDist
+from nltk.probability import FreqDist, SimpleGoodTuringProbDist
 from nltk.corpus import PlaintextCorpusReader
 import os
 import time
 import math
-import goodturing
+from goodturing import GoodTuring
 
 def find_classes(texts):
     '''
@@ -58,7 +58,7 @@ def char_ngram_stats(texts, corpus, order, include_lower=False):
         
         empty = len(corpus.raw(text)) == 0 
     
-        # One list per n
+        # One freq. dist per n
         text_ngrams = []
         for _ in range(order):
             text_ngrams.append(FreqDist())
@@ -108,13 +108,6 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
         #freqs = FreqDist(text_ngrams[t][order-1])
         freqs = text_fds[t][order-1]
         
-        # Frequencies for n-1-gram
-        #if cg_representation or kn_smooth:
-        #    allfreqdists = []
-        #    for l in text_ngrams[t]:
-        #        allfreqdists.append(FreqDist(l))
-        #    #lowerord_fd = FreqDist(text_ngrams[t][order-2])
-        
         if gt_smooth:
             
             # TODO: Gt smoothing does not use CG representation
@@ -125,39 +118,15 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
             nrl = []
             for r in rl:
                 nrl.append(freqs.Nr(r))
-            #print rl
-            #print nrl
-            
-            # Find parameters for smoothed Nr
-            a, b, X = goodturing.gt_nr_smooth(rl, nrl)
-            N = freqs.N()
-            p0_all = 1.0
-            if N > 0: 
-                p0_all = freqs.Nr(1) / float(N) # Probability for all unseen objects
-            #print 'p0_all', p0_all
-            # Dict of r,r*
-            #print 'X', X
-            
-            
-            rsl = goodturing.gt_r_est(rl, nrl, a, b, X)
-            #print rsl
-            # Nstar is the total number of objects, using estimated r
-            Nstar = 0
-            for p in rsl.items():
-                Nr = freqs.Nr(p[0])
-                Nstar = Nstar + (Nr * p[1])
-            #if Nstar == 0:
-            #    print 'X', X
-            #    print freqs.items()
-            
-            # Calculate p0 for unseen (r == 0) ngrams
+                
             unseen = 0
             for ngram in ngrams:
                 if freqs[ngram] == 0: # This checks r == 0
                     unseen = unseen + 1
-            if unseen > 0:
-                p0 = p0_all / float(unseen)   
-                print 'Unseen', unseen, 'p0', p0         
+            #print 'un', unseen, freqs.B()
+                
+            gt = GoodTuring(rl, nrl, freqs.N(), unseen)
+            gt_freq = SimpleGoodTuringProbDist(freqs, freqs.B()+unseen)
         
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text 
@@ -171,8 +140,8 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
                     c_sum = text_fds[t][order-2][lowerord_ng]
                     #print ngram, lowerord_ng, occurrences, c_sum
                     freq = occurrences / float(c_sum)
-                if ngram == (u't', u'h', u'e'):
-                    print ngram, occurrences, c_sum, freq, freqs.freq(ngram)
+                #if ngram == (u't', u'h', u'e'):
+                #    print ngram, occurrences, c_sum, freq, freqs.freq(ngram)
             else:
                 freq = freqs.freq(ngram)
             
@@ -181,23 +150,10 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
             #print 'freq', freq
             if gt_smooth:
                 r = freqs[ngram]
-                if r > 0: # GT smoothing for seen objects
-                    rstar = rsl[r]
-                    pr = rstar/float(N)
-                    #print ngram, pr
-                    # re-normalize probability
-                    if gt_renorm:
-                        freq = (1-p0_all)*(rstar/Nstar)
-                    else:
-                        freq = pr
-                elif gt_p0:
-                    freq = p0
-                
-                # TODO: In personae, all word ngrams have freq = 0
-                #print ngram, freq
-                #if freqs[ngram] > 0 and a is not None and \
-                #b is not None and b <= -1:
-                #    freq = gt_r_est(freqs, N, ngram, a, b, X)
+                freq = gt.prob(r)
+                print r
+                print 'myfreq', freq
+                print 'defreq', gt_freq.prob(ngram)
                 
             feature_matrix[t].append(freq)
         

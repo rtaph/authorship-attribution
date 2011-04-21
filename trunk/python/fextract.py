@@ -90,6 +90,8 @@ print "Corpus is", corpus_root
 #st_file.write("Corpus is " + corpus_root + "\n")
 
 print 'Prob. of n-grams depend on history:', CG_REPR
+print 'Good-Turing:', GT_SMOOTH
+print 'Kneser-Ney:', KN_SMOOTH
 
 start = time.time()
 

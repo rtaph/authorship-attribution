@@ -4,19 +4,20 @@ import util
 from nltk.probability import FreqDist
 from nltk.corpus import PlaintextCorpusReader
 import csv
-import util
 import kneserney
+import time
+from goodturing import GoodTuring
 
 n_char_ngrams = 150
 char_ngram_size = 3
 
 NBINS = 10
 
-CG_REPRESENTATION = True 
-KN_SMOOTHING = False # Infers CG_REPRESENTATION
-GT_SMOOTHING = False
+CG_REPRESENTATION = False 
+KN_SMOOTHING = False # Implies CG_REPRESENTATION
+GT_SMOOTHING = True
 
-CV_K = 10
+CV_K = 2
 
 top=10
 
@@ -51,13 +52,35 @@ if __name__ == '__main__':
     features = []
     for t in text_ngrams:
         myfeats = [] # features for the current text
+        
+        if GT_SMOOTHING:
+            if CG_REPRESENTATION:
+                pass # TODO: Implement
+            else:
+                # Frequencies
+                rl = sorted(list(set(t[char_ngram_size-1].values()))) # list of r
+                # Frequencies of frequencies
+                nrl = []
+                for r in rl:
+                    nrl.append(t[char_ngram_size-1].Nr(r))
+                        
+                unseen = 0
+                for f in mostfreqngs:
+                    if t[char_ngram_size-1][f] == 0: # This checks r == 0
+                        unseen = unseen + 1
+                #print 'un', unseen, freqs.B()
+                        
+                gt = GoodTuring(rl, nrl, t[char_ngram_size-1].N(), unseen)
+        
         for f in mostfreqngs:
             if GT_SMOOTHING:
                 p = 0
                 if CG_REPRESENTATION:
                     pass # TODO: Implement
                 else:
-                    pass # TODO: Implement
+                    r = t[char_ngram_size-1][f]
+                    p = gt.prob(r)
+
             elif KN_SMOOTHING:
                 p = kneserney.modkn(f, t)
             elif CG_REPRESENTATION:
@@ -73,6 +96,7 @@ if __name__ == '__main__':
         #print myfeats
         features.append(myfeats)
     
+    start = time.time()
     
     # Find feature-value bins
     bins = naivebayes.build_feat_bins(features, NBINS)
@@ -204,5 +228,8 @@ if __name__ == '__main__':
     for row in perf:
         w.writerow(row)
     pf.close()
+    
+    end = time.time()
+    print "Time: {0}".format(end-start)
         
         

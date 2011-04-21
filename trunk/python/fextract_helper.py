@@ -81,7 +81,7 @@ def char_ngram_stats(texts, corpus, order, include_lower=False):
             
     return all_char_ngrams, text_char_ngrams
 
-def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smooth=False, gt_smooth=False, gt_renorm=True, gt_p0=True):
+def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smooth=False, gt_smooth=False):
     '''
     Create n-gram features for each text, using the list of n-grams
     to consider given in ngrams argument. Can be used for both
@@ -111,6 +111,7 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
         if gt_smooth:
             
             # TODO: Gt smoothing does not use CG representation
+            gts = []
             
             # Frequencies
             rl = sorted(list(set(freqs.values()))) # list of r
@@ -132,7 +133,24 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
         # relative frequency for each n-gram in each text 
         for ngram in ngrams:
             
-            if cg_representation:
+            #if freq == 0:
+            #    unseen = unseen + 1
+            #print 'freq', freq
+            if gt_smooth:
+                
+                if cg_representation:
+                    pass # TODO: Gt smoothing does not use CG representation
+                else:
+                    r = freqs[ngram]
+                    freq = gt.prob(r)
+                    #print r
+                    #print 'myfreq', freq
+                    #print 'defreq', gt_freq.prob(ngram)
+            
+            elif kn_smooth:
+                pass # TODO: Use Kneser-Ney (when its done)
+            
+            elif cg_representation:
                 freq = 0
                 occurrences = freqs[ngram]
                 if occurrences > 0:
@@ -144,16 +162,6 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
                 #    print ngram, occurrences, c_sum, freq, freqs.freq(ngram)
             else:
                 freq = freqs.freq(ngram)
-            
-            #if freq == 0:
-            #    unseen = unseen + 1
-            #print 'freq', freq
-            if gt_smooth:
-                r = freqs[ngram]
-                freq = gt.prob(r)
-                print r
-                print 'myfreq', freq
-                print 'defreq', gt_freq.prob(ngram)
                 
             feature_matrix[t].append(freq)
         
@@ -367,7 +375,6 @@ def get_cngs(texts, corpus_root, ngram_size):
 #                elif gt_p0:
 #                    freq = p0
 #                
-#                # TODO: In personae, all word ngrams have freq = 0
 #                #print ngram, freq
 #                #if freqs[ngram] > 0 and a is not None and \
 #                #b is not None and b <= -1:

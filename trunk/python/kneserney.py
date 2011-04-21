@@ -67,6 +67,9 @@ def calc_discount(ngram, c, ngs):
     
     return d, d1, d2, d3
 
+def continuation_prob(ngram, ngrams_freqdists):
+    pass
+
 def modkn(ngram, ngram_freqdists):
     '''
     Modified Kneser-Ney.
@@ -76,7 +79,7 @@ def modkn(ngram, ngram_freqdists):
     2-grams, ..., n-grams for a text.
     '''
     
-    print 'ngram', ngram, ngram[:-1]
+    #print 'ngram', ngram, ngram[:-1]
     order = len(ngram) # order of given n-gram
     ngs = ngram_freqdists[order-1] # freq. dist for the ngrams of same order
     #print 'ngs', ngs
@@ -84,18 +87,18 @@ def modkn(ngram, ngram_freqdists):
     if order == 1:
         
         myp = ngs.freq(ngram) # MLE for 1-grams
-        print 'myp', myp
+        #print 'myp', myp
         return myp
     
     else:    
         
         # c
         c = ngs[ngram]
-        print 'c', c
+        #print 'c', c
         
         # Count of history
         lowerorder_ngs = ngram_freqdists[order-2]
-        print lowerorder_ngs, lowerorder_ngs[ngram[:-1]], lowerorder_ngs[ngram[1:]] 
+        #print lowerorder_ngs, lowerorder_ngs[ngram[:-1]], lowerorder_ngs[ngram[1:]] 
         csum = lowerorder_ngs[ngram[:-1]]
         #print 'csum', csum
         
@@ -111,13 +114,14 @@ def modkn(ngram, ngram_freqdists):
             
             # Gamma
             gamma = ((d1*N1)+(d2*N2)+(d3*N3))/float(csum)
-            print 'gamma', gamma
+            #print 'gamma', gamma
             
             # Interpolated probability
             myp = ((c-d)/float(csum))
-            print 'myp', myp
-            return myp + (gamma*modkn(ngram[1:],ngram_freqdists))
+            #print 'myp', myp
+            return myp + (gamma*modkn(ngram[1:],ngram_freqdists)) # TODO: Not correct! See (23)
         else:
+            print 'csum is 0!'
             return 0 # TODO: Or return modkn(ngram[1:],ngram_freqdists) ????
         
     

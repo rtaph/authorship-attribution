@@ -68,9 +68,12 @@ def calc_discount(ngram, c, ngs):
     return d, d1, d2, d3
 
 def continuation_prob(ngram, ngrams_freqdists):
-    pass
+    num = 0
+    denom = 1
+    return num / denom
 
-def modkn(ngram, ngram_freqdists):
+
+def modkn(ngram, ngram_freqdists, recursion_stop=1):
     '''
     Modified Kneser-Ney.
     Calculate probability for an ngram
@@ -84,9 +87,10 @@ def modkn(ngram, ngram_freqdists):
     ngs = ngram_freqdists[order-1] # freq. dist for the ngrams of same order
     #print 'ngs', ngs
         
-    if order == 1:
+    if order == recursion_stop:
         
-        myp = ngs.freq(ngram) # MLE for 1-grams
+        #myp = ngs.freq(ngram) # MLE for 1-grams
+        myp = continuation_prob(ngram, ngram_freqdists)
         #print 'myp', myp
         return myp
     

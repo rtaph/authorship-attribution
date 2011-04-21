@@ -14,10 +14,10 @@ char_ngram_size = 3
 NBINS = 10
 
 CG_REPRESENTATION = False 
-KN_SMOOTHING = False # Implies CG_REPRESENTATION
-GT_SMOOTHING = True
+KN_SMOOTHING = True # Implies CG_REPRESENTATION
+GT_SMOOTHING = False
 
-CV_K = 2
+CV_K = 10
 
 top=10
 
@@ -37,7 +37,9 @@ if __name__ == '__main__':
     distinct_classes = list(set(text_classes))  
     
     print 'Finding ngrams in texts...'
-    all_ngrams, text_ngrams = fextract_helper.char_ngram_stats(texts, corpus, char_ngram_size,CG_REPRESENTATION or KN_SMOOTHING)
+    all_ngrams, text_ngrams = \
+        fextract_helper.char_ngram_stats(texts, corpus, char_ngram_size, \
+                                         CG_REPRESENTATION or KN_SMOOTHING)
     
     # Determine features
     print 'Finding most frequent n-grams...'
@@ -55,7 +57,7 @@ if __name__ == '__main__':
         
         if GT_SMOOTHING:
             if CG_REPRESENTATION:
-                pass # TODO: Implement
+                pass # TODO: Implement?
             else:
                 # Frequencies
                 rl = sorted(list(set(t[char_ngram_size-1].values()))) # list of r
@@ -76,7 +78,7 @@ if __name__ == '__main__':
             if GT_SMOOTHING:
                 p = 0
                 if CG_REPRESENTATION:
-                    pass # TODO: Implement
+                    pass # TODO: Implement?
                 else:
                     r = t[char_ngram_size-1][f]
                     p = gt.prob(r)

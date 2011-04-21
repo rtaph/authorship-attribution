@@ -4,7 +4,7 @@ import itertools
 
 def calcbigns(ngram,ngs):
     '''
-    Calculate N1, N2 and N3+ for Kneser-Ney smoothing.
+    Calculate N_1, N_2 and N_3+ for Kneser-Ney smoothing.
     '''
     
     # Find chars/words that occur after the n-1 first chars/words in
@@ -63,14 +63,47 @@ def calc_discount(ngram, c, ngs):
         d = d2
     elif c > 2:
         d = d3
-    #print 'd', d
     
     return d, d1, d2, d3
 
-def continuation_prob(ngram, ngrams_freqdists):
-    num = 0
-    denom = 1
-    return num / denom
+def continuation_prob(ngram, ng_fds):
+    '''
+    Used to end recursion in modified KN.
+    @param ng_fds: Freq.dists for each order of n-grams. Expected that
+    n < len(ng_fds)-1 
+    '''
+    
+    order = len(ngram)
+    myorder_ngs = ng_fds[order-1]
+    highorder_ngs = ng_fds[order]
+    
+    # Numerator: Number of distinct words/chars that precedes the latter
+    # part (or the entire ngram if n=1) of the given ngram.
+    
+    # Denominator: The sum of number of distinct words/chars that precedes the
+    # middle part of ngram, using different ends of the ngram. If given an
+    # unigram, this equals the count of all distinct bigrams.
+    
+    if order == 1: # unigram
+        num = 0
+        #print 'n', ngram
+        for hng in highorder_ngs:
+            #print 'n+1', hng
+            if hng[1:] == ngram:
+                num = num + 1
+        denom = len(highorder_ngs)
+    else:
+        num = 0
+        for ng in myorder_ngs:
+            if ng[1:] == ngram[1:]:
+                num = num + 1
+        denom = 0
+        for ng in myorder_ngs:
+            if ng[1:-1] == ngram[1:-1]:
+                denom = denom + 1
+    
+    # TODO: Does denom == 0 ever occur?
+    return num / float(denom)
 
 
 def modkn(ngram, ngram_freqdists, recursion_stop=1):
@@ -82,75 +115,73 @@ def modkn(ngram, ngram_freqdists, recursion_stop=1):
     2-grams, ..., n-grams for a text.
     '''
     
-    #print 'ngram', ngram, ngram[:-1]
     order = len(ngram) # order of given n-gram
     ngs = ngram_freqdists[order-1] # freq. dist for the ngrams of same order
-    #print 'ngs', ngs
         
+    # To end recursion, we use N_1+(x w_i) / N_1+(x x) 
     if order == recursion_stop:
-        
-        #myp = ngs.freq(ngram) # MLE for 1-grams
         myp = continuation_prob(ngram, ngram_freqdists)
-        #print 'myp', myp
         return myp
     
     else:    
         
-        # c
+        # count of n-gram
         c = ngs[ngram]
-        #print 'c', c
         
         # Count of history
-        lowerorder_ngs = ngram_freqdists[order-2]
-        #print lowerorder_ngs, lowerorder_ngs[ngram[:-1]], lowerorder_ngs[ngram[1:]] 
-        csum = lowerorder_ngs[ngram[:-1]]
-        #print 'csum', csum
+        lowerorder_ngs = ngram_freqdists[order-2] 
+        c_hist = lowerorder_ngs[ngram[:-1]]
         
-        if csum > 0:
+        if c_hist > 0:
+            
             # Discount, d
             d, d1, d2, d3 = calc_discount(ngram, c, ngs)
-            #print 'd', d, 'd1', d1, 'd2', d2, 'd3', d3
             
-            # N1, N2, N3
-            #print ngs.samples()
+            # N_1, N_2, N_3+
             N1, N2, N3 = calcbigns(ngram, ngs)
-            #print 'N1', N1, 'N2', N2, 'N3', N3
             
             # Gamma
-            gamma = ((d1*N1)+(d2*N2)+(d3*N3))/float(csum)
-            #print 'gamma', gamma
+            gamma = ((d1*N1)+(d2*N2)+(d3*N3))/float(c_hist)
             
-            # Interpolated probability
-            myp = ((c-d)/float(csum))
-            #print 'myp', myp
-            return myp + (gamma*modkn(ngram[1:],ngram_freqdists)) # TODO: Not correct! See (23)
+            # Probability of this ngram
+            myp = ((c-d)/float(c_hist))
+            
+            # Return interpolated probability
+            return myp + (gamma*modkn(ngram[1:],ngram_freqdists,recursion_stop))
+        
         else:
-            print 'csum is 0!'
-            return 0 # TODO: Or return modkn(ngram[1:],ngram_freqdists) ????
+            # Mod. KN does not state with what factor we should interpolate
+            # the prob. of n-1-order ngrams if the count of this n-1-gram is 0,
+            # so we just return 0 
+            return 0
         
     
 if __name__ == '__main__':
     #print modkn(('a','b','c'))
     
-    text = "hej med dig hej hej den er god med dig hvordan gaar det"
+    text = "hej med dig hej hej den er god med dig hvordan g haar det heerre eheerhe"
     #ng = ('j', ' ', 'm')
     
     ng_freqdists = []
-    for i in range(1,4):
+    for i in range(1,5):
         nglist = ngrams(text,i)
         ng_fd = FreqDist(nglist)
-        print ng_fd
+        print len(ng_fd), ng_fd
         ng_freqdists.append(ng_fd)
     
     #bla = 0
-    for ng in ngrams(text,3):
-        pkn = modkn(ng, ng_freqdists)
+    for ng in ngrams(text,4):
+        ng = ('g',' ','h','e')
+        print 'Input', ng
+        pkn = modkn(ng, ng_freqdists,3)
         print 'pKN:', pkn
-        csum = ng_freqdists[1][ng[:-1]]
+        c_hist = ng_freqdists[2][ng[:-1]]
+        print 's', c_hist
         #print 'p:  ', ng_freqdists[2].freq(ng)
-        print 'p:  ', ng_freqdists[2][ng] / float(csum)
+        print 'p:  ', ng_freqdists[3][ng] / float(c_hist)
         #bla = bla + ng_freqdists[2].freq(ng)
         print '------------------------\n\n\n'
+        exit()
     
     #print 'bla', bla
     #ng = ('a','b','c')

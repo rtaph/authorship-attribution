@@ -7,13 +7,14 @@ import csv
 import util
 import kneserney
 
-n_char_ngrams = 1000
+n_char_ngrams = 150
 char_ngram_size = 3
 
 NBINS = 10
 
-CG_REPRESENTATION = True
-KN_SMOOTHING = True
+CG_REPRESENTATION = True 
+KN_SMOOTHING = False # Infers CG_REPRESENTATION
+GT_SMOOTHING = False
 
 CV_K = 10
 
@@ -22,7 +23,7 @@ top=10
 PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb.csv"
 
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p2"
 
 if __name__ == '__main__':
     
@@ -35,7 +36,7 @@ if __name__ == '__main__':
     distinct_classes = list(set(text_classes))  
     
     print 'Finding ngrams in texts...'
-    all_ngrams, text_ngrams = fextract_helper.char_ngram_stats(texts, corpus, char_ngram_size,CG_REPRESENTATION)
+    all_ngrams, text_ngrams = fextract_helper.char_ngram_stats(texts, corpus, char_ngram_size,CG_REPRESENTATION or KN_SMOOTHING)
     
     # Determine features
     print 'Finding most frequent n-grams...'
@@ -50,28 +51,28 @@ if __name__ == '__main__':
     features = []
     for t in text_ngrams:
         myfeats = [] # features for the current text
-        freqdists = []
-        for l in t:
-            freqdists.append(FreqDist(l))
-        #print freqdist
-        #if CG_REPRESENTATION:
-        #    lowerord_fd = FreqDist(t[char_ngram_size-2])
-        #    #print lowerord_fd
         for f in mostfreqngs:
-            if KN_SMOOTHING:
-                freq = kneserney.modkn(f, freqdists)
+            if GT_SMOOTHING:
+                p = 0
+                if CG_REPRESENTATION:
+                    pass # TODO: Implement
+                else:
+                    pass # TODO: Implement
+            elif KN_SMOOTHING:
+                p = kneserney.modkn(f, t)
             elif CG_REPRESENTATION:
-                freq = 0
-                occurrences = freqdists[char_ngram_size-1][f]
+                p = 0
+                occurrences = t[char_ngram_size-1][f]
                 if occurrences > 0:
                     lowerord_ng = f[:-1]
-                    #print lowerord_ng
-                    c_sum = freqdists[char_ngram_size-2][lowerord_ng]
-                    freq = occurrences / float(c_sum)
-                myfeats.append(freq)
+                    c_sum = t[char_ngram_size-2][lowerord_ng]
+                    p = occurrences / float(c_sum)
             else:
-                myfeats.append(freqdists[char_ngram_size-1].freq(f))
+                p = t[char_ngram_size-1].freq(f)
+            myfeats.append(p)
+        #print myfeats
         features.append(myfeats)
+    
     
     # Find feature-value bins
     bins = naivebayes.build_feat_bins(features, NBINS)
@@ -169,7 +170,7 @@ if __name__ == '__main__':
             foldf1.append(f1)
             
         # Average precision, recall and f1 for fold
-        print foldp, foldr, foldf1
+        #print foldp, foldr, foldf1
         avgfoldp = util.avgwith_none(foldp)
         avgfoldr = util.avgwith_none(foldr)
         avgfoldf1 = util.avgwith_none(foldf1)
@@ -187,7 +188,7 @@ if __name__ == '__main__':
         c = class_p.keys()[i]
         avgcp = util.avgwith_none(class_p[c])
         avgcr = util.avgwith_none(class_r[c])        
-        print c, avgcp, avgcr
+        #print c, avgcp, avgcr
         perf[i][4] = avgcp
         perf[i][5] = avgcr
         avgcf1 = None

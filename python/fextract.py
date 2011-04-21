@@ -16,11 +16,11 @@ function_words = False
 FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zlch06"
 
 
-CG_REPR = True
+CG_REPR = False
 KN_SMOOTH = False
 GT_SMOOTH = True
-GT_RENORM = True
-GT_P0 = True
+#GT_RENORM = True
+#GT_P0 = True
 
 # output files
 FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
@@ -31,8 +31,8 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_40_all"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_6"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
@@ -124,8 +124,8 @@ if char_ngrams:
     #feat_charngram = fextract_helper.create_char_ngrams(n_char_ngrams, a, t)
     s1 = time.time()
     feat_charngram = fextract_helper.create_ngram_feats(mostfreq_ngs, char_ngram_size, \
-                                                        t, CG_REPR, KN_SMOOTH, GT_SMOOTH, \
-                                                        GT_RENORM, GT_P0)
+                                                        t, CG_REPR or KN_SMOOTH, \
+                                                        KN_SMOOTH, GT_SMOOTH)
     e1 = time.time()
     print 'Creating took', e1-s1, 'seconds'
     

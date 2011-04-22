@@ -223,10 +223,13 @@ if __name__ == '__main__':
         perf[i][4] = avgcp
         perf[i][5] = avgcr
         avgcf1 = None
+        #print i, avgcp, avgcr
         if avgcp == 0 and avgcr == 0:
             avgcf1 = 0
-        elif avgcp is not None and r is not None:
+            #print avgcf1
+        elif avgcp is not None and avgcr is not None:
             avgcf1 = (2*avgcp*avgcr) / float(avgcp+avgcr)
+            #print avgcf1
         perf[i][6] = avgcf1 
     
     # ----- Write performance measures to file ----- #

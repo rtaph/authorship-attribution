@@ -14,7 +14,7 @@ char_ngram_size = 3
 NBINS = 10
 
 CG_REPRESENTATION = False 
-KN_SMOOTHING = True # Implies CG_REPRESENTATION
+KN_SMOOTHING = False # Implies CG_REPRESENTATION
 GT_SMOOTHING = False
 
 CV_K = 10
@@ -24,9 +24,14 @@ top=10
 PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb.csv"
 
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p2"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_known"
 
 if __name__ == '__main__':
+    
+    print 'CG:', CG_REPRESENTATION or KN_SMOOTHING
+    print 'Good-Turing:', GT_SMOOTHING
+    print 'Kneser-Ney:', KN_SMOOTHING
     
     corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
     texts = corpus.fileids()
@@ -121,7 +126,7 @@ if __name__ == '__main__':
         class_f1[c] = [None for i in range(CV_K)]
     
     # All performance measures
-    perf = [[None for j in range(7)] for i in range(len(distinct_classes))]
+    perf = [[None for j in range(7)] for i in range(max(len(distinct_classes),CV_K))]
     
     for k in range(CV_K):
         

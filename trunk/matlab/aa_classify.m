@@ -191,7 +191,6 @@ end
 avgRecall = meanwithnan(avgClassRecalls',2);
 
 % F1 is calculated from the averages of precisions and recalls
-
 %classF1s
 %avgClassF1s = meanwithnan(classF1s,2)
 avgClassF1s = nan(nClasses,1);

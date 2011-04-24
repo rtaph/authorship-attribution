@@ -19,28 +19,20 @@ FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zl
 CG_REPR = False
 KN_SMOOTH = False
 GT_SMOOTH = True
-#GT_RENORM = True
-#GT_P0 = True
 
 # output files
 FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
 CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 #FEATURE_FILE = "/home/epb/Documents/code/out.txt"
 #CATEGORY_FILE = "/home/epb/Documents/code/cat.txt"
-#STATUS_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out_state.txt"
 
 # folder with corpus
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_single_quat_multi"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/f2"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1_40_all"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_40_6"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/all"
-
-
-#st_file = open(STATUS_FILE,"w")
-#st_file.write(str(time.strftime("%X %x")) + "\n")
 
 # Get options from command line
 a = 0
@@ -87,8 +79,6 @@ while a < len(sys.argv):
     a = a + i
     
 print "Corpus is", corpus_root
-#st_file.write("Corpus is " + corpus_root + "\n")
-
 print 'Prob. of n-grams depend on history:', CG_REPR
 print 'Good-Turing:', GT_SMOOTH
 print 'Kneser-Ney:', KN_SMOOTH

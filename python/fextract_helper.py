@@ -2,9 +2,8 @@ from nltk.util import ngrams
 from nltk.probability import FreqDist, SimpleGoodTuringProbDist
 from nltk.corpus import PlaintextCorpusReader
 import os
-import time
-import math
 from goodturing import GoodTuring
+import kneserney
 
 def find_classes(texts):
     '''
@@ -127,7 +126,7 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
             #print 'un', unseen, freqs.B()
                 
             gt = GoodTuring(rl, nrl, freqs.N(), unseen)
-            gt_freq = SimpleGoodTuringProbDist(freqs, freqs.B()+unseen)
+            #gt_freq = SimpleGoodTuringProbDist(freqs, freqs.B()+unseen)
         
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text 
@@ -148,7 +147,7 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
                     #print 'defreq', gt_freq.prob(ngram)
             
             elif kn_smooth:
-                pass # TODO: Use Kneser-Ney (when its done)
+                freq = kneserney.modkn(ngram, text_fds[t])
             
             elif cg_representation:
                 freq = 0

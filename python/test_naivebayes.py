@@ -14,7 +14,7 @@ char_ngram_size = 3
 NBINS = 10
 
 CG_REPRESENTATION = False 
-KN_SMOOTHING = False # Implies CG_REPRESENTATION
+KN_SMOOTHING = True # Implies CG_REPRESENTATION
 GT_SMOOTHING = False
 
 CV_K = 10
@@ -23,15 +23,19 @@ top=10
 
 PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb.csv"
 
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p2"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_known"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/F2"
 
 if __name__ == '__main__':
     
     print 'CG:', CG_REPRESENTATION or KN_SMOOTHING
     print 'Good-Turing:', GT_SMOOTHING
     print 'Kneser-Ney:', KN_SMOOTHING
+    print 'Corpus:', corpus_root
+    print 'N-grams:', n_char_ngrams
+    
+    start = time.time()
     
     corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
     texts = corpus.fileids()
@@ -103,8 +107,6 @@ if __name__ == '__main__':
         #print myfeats
         features.append(myfeats)
     
-    start = time.time()
-    
     # Find feature-value bins
     bins = naivebayes.build_feat_bins(features, NBINS)
     print 'bins', bins, len(bins)
@@ -139,6 +141,8 @@ if __name__ == '__main__':
         
         print 'Train texts:', len(traint)
         print 'Test texts:', len(testt)
+        #print trainc
+        #print testc
     
         cps, fcps = naivebayes.nb_train(trainc, traint, bins)
         print 'Classifying..'

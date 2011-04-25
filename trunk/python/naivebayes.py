@@ -34,6 +34,7 @@ def nb_train(data_classes, data, bins):
         cps[c] = ntexts_perclass[c] / float(ntexts)
 
     #print cps
+    #raw_input()
     return cps, fcps 
 
 def nb_trainclass(features, bins):
@@ -137,6 +138,8 @@ def nb_classify_text(cps, fcps, tfeat, bins, ntop=1):
     # Find highest probability and hereby most likely class
     # Start by sorting by probability
     sorted_ps = sorted(ps.iteritems(),key=operator.itemgetter(1),reverse=True)
+    #print sorted_ps
+    #raw_input()
     
     # Return the top probabilities
     nbest = min([len(sorted_ps),ntop])

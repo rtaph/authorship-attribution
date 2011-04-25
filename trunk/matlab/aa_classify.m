@@ -1,4 +1,4 @@
-function avgAccuracy = aa_classify (runPython, voteReal, method, kernel, kerneloption, corpus)
+function avgAccuracy = aa_classify (runPython, voteReal, method, kernel, kerneloption, corpus, multi)
 % runPython: Run the python script prior to classification
 % method: AvA or OvA
 % kernel: For AvA: . For OvA:
@@ -8,13 +8,19 @@ function avgAccuracy = aa_classify (runPython, voteReal, method, kernel, kernelo
 
 autoCluster = false;
 
-if nargin < 5
+
+if strcmp(method,'OVA') && nargin < 5
     kerneloption = 2;
 end
 
+if nargin < 7
+    multi = false;
+end
+multi
+
 if runPython
     
-    if nargin < 6
+    if nargin < 6 || isempty(corpus)
         corpus = '/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/set3_10_2/';
     end
     featureParams = '-c 3 150 -w 3 150';
@@ -31,16 +37,18 @@ if runPython
     %classes = load(char(files(2)));
 end
 
-performanceFile = '/Users/epb/Documents/uni/kandidat/speciale/code/perf.csv'
+performanceFile = '/Users/epb/Documents/uni/kandidat/speciale/code/perf_svm.csv'
 %performanceFile = '/home/epb/Documents/code/perf.csv'
 
 %outputFolder = '/home/epb/Documents/output/';
 outputFolder = '/Users/epb/Documents/uni/kandidat/speciale/output/';
 
-%outFile = 'personae/1000_3char/p2.out.txt'
-%catFile = 'personae/1000_3char/p2.cat.txt'
-outFile = 'blogs/150_3char_150_3wrd/a1_005_10.out.txt'
-catFile = 'blogs/150_3char_150_3wrd/a1_005_10.cat.txt'
+%outFile = 'personae/150_3char/p3.out.txt'
+%catFile = 'personae/150_3char/p3.cat.txt'
+outFile = 'fed/2000_3char_kn/f2.out.txt'
+catFile = 'fed/2000_3char_kn/f2.cat.txt'
+%outFile = 'blogs/150_3char_150_3wrd/a1_005_10.out.txt'
+%catFile = 'blogs/150_3char_150_3wrd/a1_005_10.cat.txt'
 %outFile = '../code/out.txt'
 %catFile = '../code/cat.txt'
 
@@ -83,9 +91,13 @@ if strcmp(method,'AVA') && autoCluster
 end
     
 
-
 tic;
-k = 4;
+
+if multi
+    matlabpool open local 4
+end
+
+k = 10;
 accuracies = zeros(1,k);
 classPrecisions = zeros(nRealClasses,k); % precision per class
 classRecalls = zeros(nRealClasses,k); % recall per class
@@ -116,10 +128,10 @@ for i=1:k
     % Classification
     if strcmp(method,'AVA')
         if voteReal || autoCluster
-            classified = classifyava(trainData,trainClasses,testData,nClasses,kernel,realClasses);
+            classified = classifyava(trainData,trainClasses,testData,nClasses,kernel,realClasses,multi);
             %classified = classifyava(data,classes,testData,trainIndices,kernel,realClasses);
         else
-            classified = classifyava(trainData,trainClasses,testData,nClasses,kernel);
+            classified = classifyava(trainData,trainClasses,testData,nClasses,kernel,[],multi);
         end
     elseif strcmp(method,'OVAC')
         classified = customova(trainClasses,trainData,testData,nClasses,kernel, kerneloption);
@@ -206,17 +218,21 @@ avgFoldF1s
 %avgFoldF1s = (2*avgFoldPrecisions.*avgFoldRecalls)./(avgFoldPrecisions+avgFoldRecalls)
 %avgF1 = meanwithnan(avgClassF1s',2);
 
+if multi
+    matlabpool close
+end
+
 toc;
 
 % Write performance measures to file
-perf = nan(nClasses,7);
+perf = nan(max(nClasses,k),7);
 perf(1:k,1) = accuracies';
 perf(1:k,2) = avgFoldPrecisions';
 perf(1:k,3) = avgFoldRecalls';
 perf(1:k,4) = avgFoldF1s';
-perf(:,5) = avgClassPrecisions;
-perf(:,6) = avgClassRecalls;
-perf(:,7) = avgClassF1s;
+perf(1:nClasses,5) = avgClassPrecisions;
+perf(1:nClasses,6) = avgClassRecalls;
+perf(1:nClasses,7) = avgClassF1s;
 csvwrite(performanceFile,perf);
 
 fprintf('\n------------------------- Done -------------------------\n\n');

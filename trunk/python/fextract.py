@@ -18,7 +18,7 @@ FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zl
 
 CG_REPR = False
 KN_SMOOTH = False
-GT_SMOOTH = True
+GT_SMOOTH = False
 
 # output files
 FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
@@ -27,8 +27,8 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 #CATEGORY_FILE = "/home/epb/Documents/code/cat.txt"
 
 # folder with corpus
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/f2"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_known"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p3"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
@@ -128,7 +128,7 @@ if wrd_ngrams:
     tot_wngs = min([n_wrd_ngrams, freqs.B()])
     mostfreq_ngs = freqs.keys()[:tot_wngs]
     #feat_wrdgram = fextract_helper.create_wrd_ngrams(n_wrd_ngrams, a, t)
-    feat_wrdgram = fextract_helper.create_ngram_feats(mostfreq_ngs, t)
+    feat_wrdgram = fextract_helper.create_ngram_feats(mostfreq_ngs, wrd_ngram_size, t)
 if function_words:
     func_wds, text_func_wrds = fextract_helper.extract_fws(corpus.fileids(), corpus, FUNC_FOLDER)
     feat_funcwrds = fextract_helper.create_fw_features(func_wds, text_func_wrds)

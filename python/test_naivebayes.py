@@ -8,13 +8,13 @@ import kneserney
 import time
 from goodturing import GoodTuring
 
-n_char_ngrams = 150
+n_char_ngrams = 2000
 char_ngram_size = 3
 
 NBINS = 10
 
 CG_REPRESENTATION = False 
-KN_SMOOTHING = True # Implies CG_REPRESENTATION
+KN_SMOOTHING = False # Implies CG_REPRESENTATION
 GT_SMOOTHING = False
 
 CV_K = 10

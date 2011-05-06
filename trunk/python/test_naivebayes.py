@@ -15,7 +15,7 @@ NBINS = 10
 
 CG_REPRESENTATION = False 
 KN_SMOOTHING = False # Implies CG_REPRESENTATION
-GT_SMOOTHING = False
+GT_SMOOTHING = True
 
 CV_K = 10
 
@@ -23,8 +23,10 @@ top=10
 
 PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb.csv"
 
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an2"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/al2"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/F2"
 
 if __name__ == '__main__':
@@ -107,11 +109,17 @@ if __name__ == '__main__':
         #print myfeats
         features.append(myfeats)
     
+    pif = open("/Users/epb/Documents/uni/kandidat/speciale/code/feats.csv",'w')
+    wi = csv.writer(pif)
+    for row in features:
+        wi.writerow(row)
+    pif.close()
+    
     # Find feature-value bins
     bins = naivebayes.build_feat_bins(features, NBINS)
     print 'bins', bins, len(bins)
     #d = 3
-    #feature_bins = int(math.pow(10, d))    
+    #feature_bins = int(math.pow(10, d))
     
     # Cross-validation
     print 'Doing cross-validation...'

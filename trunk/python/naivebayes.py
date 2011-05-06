@@ -6,7 +6,7 @@ def nb_train(data_classes, data, bins):
     '''
     Train Naive Bayes classifier
         
-    @return: Prior class probabilities, 
+    @return: p(C), p(F|C)
     '''
     
     classes = list(set(data_classes))    
@@ -49,14 +49,14 @@ def nb_trainclass(features, bins):
     
     nbins = len(bins)
     
-    for i in range(len(features[0])):
+    for i in range(len(features[0])): # For each feature
         
         # For each bin; for how many documents did the feature fit into that bin 
         fb = [0 for j in range(nbins)]
         for row in features:
             
             #f = fr.freq(feature)
-            f = row[i] # feature value
+            f = row[i] # feature value for the current feature in current text
             #bin = nbins-1
             #for b in range(nbins):
             #    if f < bins[b]:
@@ -188,7 +188,7 @@ def build_feat_bins(features, b):
     avg = sum([sum(f) for f in features]) / float(len(features)*len(features[0]))
     print 'avg', avg
     print avg / float(b)
-    interval = avg / float(b) * 2 # b/2 bins on each side of the avg
+    interval = (avg/float(b)) * 2 # b/2 bins on each side of the avg
     print 'interval', interval, interval*(b/float(2)) 
     
     return numpy.arange(interval,avg+(((b/2.0)+1)*interval),interval).tolist()

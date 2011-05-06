@@ -6,8 +6,9 @@ from nltk.corpus import PlaintextCorpusReader
 
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/data_50"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/F3"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/all_known"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/B2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/al2"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an9"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/B2"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 
 corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding="UTF-8")

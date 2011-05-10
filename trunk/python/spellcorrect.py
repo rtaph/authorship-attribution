@@ -1,7 +1,7 @@
 '''
 Inspired by Peter Norvig. http://norvig.com/spell-correct.html
 '''
-import re, collections, csv
+import re, collections, codecs
 
 class SpellCorrector:
     
@@ -9,8 +9,9 @@ class SpellCorrector:
         self.alphabet = alphabet
     
     def train(self, features):
-        print 'Training spell-corrector'
-        self.word_db = collections.defaultdict(lambda: 1)
+        #print 'Training spell-corrector'
+        if not hasattr(self, 'word_db'):
+            self.word_db = collections.defaultdict(lambda: 1)
         for f in features:
             self.word_db[f] += 1
     
@@ -21,16 +22,21 @@ class SpellCorrector:
     
     def load_from_file(self, f):
         print 'Loading from', f
-        lf = open(f,'r')
-        self.word_db = eval(lf.read())
+        lf = codecs.open(f,'r','utf-8')
+        l = eval(lf.read())
         lf.close()
+        self.word_db = collections.defaultdict(lambda: 1)
+        for k, v in l:
+            self.word_db[k] = v
+        #print self.word_db
     
     def save_to_file(self, f):
         print 'Saving to', f
-        sf = open(f,'w')
-        for w in self.word_db:
-            sf.write(str(w) + "," + str(self.word_db) + "\n")
-        #sf.write(str(self.word_db))
+        #print self.word_db
+        sf = codecs.open(f,'w','utf-8')
+        #for w in self.word_db:
+        #    sf.write(str(w) + "," + str(self.word_db) + "\n")
+        sf.write(str(self.word_db.items()))
         sf.close()
     
     def _known(self, words): return set(w for w in words if w in self.word_db)

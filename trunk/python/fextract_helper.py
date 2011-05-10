@@ -4,6 +4,7 @@ from nltk.corpus import PlaintextCorpusReader
 import os
 from goodturing import GoodTuring
 import kneserney
+import csv
 
 def find_classes(texts):
     '''
@@ -454,24 +455,40 @@ def create_fw_features(func_words, text_fws):
             
     return feature_matrix
     
-def save_features(feature_file, feature_matrix, class_file, text_classes):
+def save_features(feature_file=None, feature_matrix=None,\
+                  class_file=None, text_classes=None, orig_classes=False):
     '''
     Save features of a feature matrix to a file, and a list of classes
     to another file
     '''
     
-    print "Outputting features to", feature_file
-    ff = open(feature_file,'w')
-    for f in feature_matrix:
-        strlist = [str(i) for i in f]
-        ff.write(" ".join(strlist) + "\n")
-    ff.flush()
+    if feature_file is not None and feature_matrix is not None:
+        print "Outputting features to", feature_file
+        ff = open(feature_file,'w')
+        for f in feature_matrix:
+            strlist = [str(i) for i in f]
+            ff.write(" ".join(strlist) + "\n")
+        ff.flush()
     
-    print "Outputting classes to", class_file
-    distinct_classes = list(set(text_classes))
-    cf = open(class_file,'w')
-    for c in text_classes:
-        i = distinct_classes.index(c) + 1
-        cf.write(str(i) + "\n")
-    cf.flush()
+    if class_file is not None and text_classes is not None:
+        print "Outputting classes to", class_file
+        distinct_classes = list(set(text_classes))
+        cf = open(class_file,'w')
+        for c in text_classes:
+            i = distinct_classes.index(c) + 1
+            cf.write(str(i) + "\n")
+        cf.flush()
+        
+def load_features(feature_file):
+    
+    feature_matrix = []
+    ff = open(feature_file, 'r')
+    ffr = csv.reader(ff, delimiter=' ')
+    for f in ffr:
+        l = []
+        for x in f:
+            l.append(float(x))
+        feature_matrix.append(l)
+    ff.close()
+    return feature_matrix
     

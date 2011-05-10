@@ -16,7 +16,7 @@ function_words = False
 FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zlch06"
 
 
-CG_REPR = True
+CG_REPR = False
 KN_SMOOTH = False
 GT_SMOOTH = False
 
@@ -28,11 +28,11 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_known"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p3"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an2"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/al2"
 
 # Get options from command line

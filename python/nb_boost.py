@@ -1,3 +1,7 @@
+'''
+Test boosting with Naive Bayes classifiers
+'''
+
 import naivebayes
 import fextract_helper
 import util
@@ -13,44 +17,31 @@ char_ngram_size = 3
 
 NBINS = 10
 
-#CG_REPRESENTATION = False 
-#KN_SMOOTHING = False # Implies CG_REPRESENTATION
-#GT_SMOOTHING = False
-
 CV_K = 10
 
 top=10
 
-PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb.csv"
-
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an2"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/al2"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/F2"
+PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb_boost.csv"
 
 output_dir = "/Users/epb/Documents/uni/kandidat/speciale/output/"
 data_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/"
 
-feature_dir = "150_3char"
-corpus = "personae"
-dataset = "p1"
-#corpus = "blogs"
-#dataset = "b1"
+feature_dir = "150_3char_kn"
+#corpus = "personae"
+corpus = "blogs"
+#dataset = "p1"
+dataset = "b1"
 
 
 if __name__ == '__main__':
     
-    #print 'CG:', CG_REPRESENTATION or KN_SMOOTHING
-    #print 'Good-Turing:', GT_SMOOTHING
-    #print 'Kneser-Ney:', KN_SMOOTHING
+    #print 'Corpus:', corpus
     print 'Dataset:', dataset
     feature_file = output_dir + corpus + "/" + feature_dir + "/" + dataset + ".out.txt"
     print 'Features:', feature_file
     print 'N-grams:', n_char_ngrams
     
     corpus_root = data_dir + corpus + "/" + dataset
-    print 'Corpus:', corpus_root
     
     start = time.time()
     
@@ -62,85 +53,10 @@ if __name__ == '__main__':
     ntexts = len(texts)
     distinct_classes = list(set(text_classes))  
     
+    # TODO: Load more features to construct several classifiers
+    
     print 'Loading features'
     features = fextract_helper.load_features(feature_file)
-    
-#    print 'Finding ngrams in texts...'
-#    all_ngrams, text_ngrams = \
-#            fextract_helper.char_ngram_stats(texts, corpus, char_ngram_size, \
-#                                             CG_REPRESENTATION or KN_SMOOTHING)
-#        
-#    # Determine features
-#    print 'Finding most frequent n-grams...'
-#    afreqs = FreqDist(all_ngrams)
-#    tot_cngs = min([n_char_ngrams, afreqs.B()])
-#    mostfreqngs = afreqs.keys()[:tot_cngs]
-#    print mostfreqngs
-#        
-#        
-#    # Calculate features for each text
-#    print 'Calculating features...'
-#    features = []
-#    for t in text_ngrams:
-#        myfeats = [] # features for the current text
-#            
-#        if GT_SMOOTHING:
-#            if CG_REPRESENTATION:
-#                pass # TODO: Implement?
-#            else:
-#                # Frequencies
-#                rl = sorted(list(set(t[char_ngram_size-1].values()))) # list of r
-#                # Frequencies of frequencies
-#                nrl = []
-#                for r in rl:
-#                    nrl.append(t[char_ngram_size-1].Nr(r))
-#                            
-#                unseen = 0
-#                for f in mostfreqngs:
-#                    if t[char_ngram_size-1][f] == 0: # This checks r == 0
-#                        unseen = unseen + 1
-#                            
-#                gt = GoodTuring(rl, nrl, t[char_ngram_size-1].N(), unseen)
-#            
-#        for f in mostfreqngs:
-#            if GT_SMOOTHING:
-#                p = 0
-#                if CG_REPRESENTATION:
-#                    pass # TODO: Implement?
-#                else:
-#                    r = t[char_ngram_size-1][f]
-#                    p = gt.prob(r)
-#    
-#            elif KN_SMOOTHING:
-#                p = kneserney.modkn(f, t)
-#            elif CG_REPRESENTATION:
-#                p = 0
-#                occurrences = t[char_ngram_size-1][f]
-#                if occurrences > 0:
-#                    lowerord_ng = f[:-1]
-#                    c_sum = t[char_ngram_size-2][lowerord_ng]
-#                    p = occurrences / float(c_sum)
-#            else:
-#                p = t[char_ngram_size-1].freq(f)
-#            myfeats.append(p)
-#        #print myfeats
-#        features.append(myfeats)
-        
-    #fextract_helper.save_features("/Users/epb/Documents/uni/kandidat/speciale/code/feats.csv", features)
-    #pif = open("/Users/epb/Documents/uni/kandidat/speciale/code/feats.csv",'w')
-    #wi = csv.writer(pif)
-    #for row in features:
-    #    wi.writerow(row)
-    #pif.close()
-    
-    #for h in range(len(features)):
-    #    if features[h] != features_x[h]:
-    #        print h
-    #        print features[h]
-    #        print str(features[h][0])
-    #        print features_x[h] 
-    
-    #exit()
     
     # Find feature-value bins
     bins = naivebayes.build_feat_bins(features, NBINS)
@@ -178,13 +94,10 @@ if __name__ == '__main__':
         print 'Test texts:', len(testt)
         #print trainc
         #print testc
-        
-        nb = naivebayes.NaiveBayes(bins)
-        nb.train(trainc, traint)
-        #cps, fcps = naivebayes.nb_train(trainc, traint, bins)
+    
+        cps, fcps = naivebayes.nb_train(trainc, traint, bins)
         print 'Classifying..'
-        #classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins, top)
-        classified = nb.classify(testc, testt, top)
+        classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins, top)
         
         # --- Calculate performance measures --- #
         class_classified = dict.fromkeys(distinct_classes,0)

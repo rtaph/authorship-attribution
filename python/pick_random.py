@@ -3,12 +3,12 @@ import os
 import shutil
 from nltk.corpus import PlaintextCorpusReader
 
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/all_known"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/all"
-#output_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/al2"
-output_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an9"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/all_known"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/all"
+output_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/al3"
+#output_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an9"
 
-N_TEXTS = 6000
+N_TEXTS = 3000
 
 B = 50
 

@@ -14,6 +14,9 @@ class NaiveBayes:
         @return: p(C), p(F|C)
         '''
         
+        print 'Training classifier with', len(data), 'texts'
+        #print data[0][:10]
+        #print data[1][:10]
         classes = list(set(data_classes))    
         ntexts_perclass = {} # no. of texts per class
         
@@ -106,8 +109,9 @@ class NaiveBayes:
           
         return fpf
     
-    def classify(self, classes, data, top=1):
+    def classify(self, data, top=1):
         
+        print 'Classifying', len(data), 'texts...'
         classified = []
         for d in data:
             best = self._classify_text(d, top)
@@ -134,7 +138,13 @@ class NaiveBayes:
             for i in range(len(tfeat)):
                 f = tfeat[i]
                 bin = find_feat_bin(f, self.bins)
-                fp = self.fcps[c][i][bin] # probability for feature belonging to class
+                try:
+                    fp = self.fcps[c][i][bin] # probability for feature belonging to class
+                except Exception:
+                    print c, i, bin
+                    print self.cps.keys()
+                    print self.fcps.keys()
+                    exit()
                 p = p + math.log(fp) # we can add log(p) instead of multiplying p
             ps[c] = p
         
@@ -189,10 +199,10 @@ def build_feat_bins(features, b):
 
     # New: Construct features so the average feature-value is in the middle bin            
     avg = sum([sum(f) for f in features]) / float(len(features)*len(features[0]))
-    print 'avg', avg
-    print avg / float(b)
+    #print 'avg', avg
+    #print avg / float(b)
     interval = (avg/float(b)) * 2 # b/2 bins on each side of the avg
-    print 'interval', interval, interval*(b/float(2)) 
+    #print 'interval', interval, interval*(b/float(2)) 
     
     return numpy.arange(interval,avg+(((b/2.0)+1)*interval),interval).tolist()
         

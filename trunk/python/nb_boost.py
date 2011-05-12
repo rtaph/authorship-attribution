@@ -11,11 +11,14 @@ import csv
 import kneserney
 import time
 from goodturing import GoodTuring
+import boost
 
 n_char_ngrams = 150
 char_ngram_size = 3
 
 NBINS = 10
+
+BOOST_ITER = 1
 
 CV_K = 10
 
@@ -26,19 +29,27 @@ PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb_boos
 output_dir = "/Users/epb/Documents/uni/kandidat/speciale/output/"
 data_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/"
 
-feature_dir = "150_3char_kn"
-#corpus = "personae"
-corpus = "blogs"
-#dataset = "p1"
-dataset = "b1"
+#feature_dirs = ["150_3char", "150_3char_cg", "150_3char_gt", "150_3char_kn", "2000_3char"]
+feature_dirs = ["150_3char", "150_3char_cg"]
+corpus = "personae"
+#corpus = "blogs"
+#corpus = "fed"
+dataset = "p1"
+#dataset = "b1"
+#dataset = "all_known"
 
 
 if __name__ == '__main__':
     
+    C = len(feature_dirs)
+    print 'No. of classifiers', C
     #print 'Corpus:', corpus
     print 'Dataset:', dataset
-    feature_file = output_dir + corpus + "/" + feature_dir + "/" + dataset + ".out.txt"
-    print 'Features:', feature_file
+    feature_files = [] 
+    for d in feature_dirs:
+        feature_file = output_dir + corpus + "/" + d + "/" + dataset + ".out.txt"
+        print 'Features:', feature_file
+        feature_files.append(feature_file)
     print 'N-grams:', n_char_ngrams
     
     corpus_root = data_dir + corpus + "/" + dataset
@@ -51,22 +62,29 @@ if __name__ == '__main__':
     #    print t
     text_classes = fextract_helper.find_classes(texts)
     ntexts = len(texts)
-    distinct_classes = list(set(text_classes))  
+    distinct_classes = list(set(text_classes))
+    print 'Corpus has', ntexts, 'texts by', len(distinct_classes), 'authors'  
     
-    # TODO: Load more features to construct several classifiers
-    
+    # Load a feature-set per classifier to construct several classifiers
     print 'Loading features'
-    features = fextract_helper.load_features(feature_file)
+    features = []
+    for f in feature_files:
+        my_features = fextract_helper.load_features(f)
+        features.append(my_features)
     
-    # Find feature-value bins
-    bins = naivebayes.build_feat_bins(features, NBINS)
-    print 'bins', bins, len(bins)
+    # Find feature-value bins (per feature set)
+    bins = []
+    for f in features:
+        my_bins = naivebayes.build_feat_bins(f, NBINS)
+        bins.append(my_bins)
+    #print 'bins', bins, len(bins)
     #d = 3
     #feature_bins = int(math.pow(10, d))
     
     # Cross-validation
     print 'Doing cross-validation...'
     k_indices = util.k_fold_cv_ind(text_classes,CV_K)
+    print k_indices
     
     class_p = dict.fromkeys(distinct_classes)
     for c in class_p:
@@ -81,23 +99,59 @@ if __name__ == '__main__':
     # All performance measures
     perf = [[None for j in range(7)] for i in range(max(len(distinct_classes),CV_K))]
     
+    no_of_nb_train = (CV_K-1) / 2
+    
+    
+    
     for k in range(CV_K):
         
         print '---------------   k=' + str(k+1) + '  ------------------'
         
-        trainc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] != k]
-        traint = [features[i] for i in range(len(features)) if k_indices[i] != k]
-        testc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] == k]
-        testt = [features[i] for i in range(len(features)) if k_indices[i] == k]
+        non_ks = range(CV_K)
+        non_ks.remove(k)
+        print 'Non ks', non_ks
+        nb_ks = [non_ks[i] for i in range(len(non_ks)) if i < no_of_nb_train]
+        boost_ks = [non_ks[i] for i in range(len(non_ks)) if i >= no_of_nb_train]
+        print nb_ks
+        print boost_ks
         
-        print 'Train texts:', len(traint)
-        print 'Test texts:', len(testt)
+        nb_trainc = [text_classes[i] for i in range(len(text_classes)) if nb_ks.count(k_indices[i]) > 0]
+        boost_trainc = [text_classes[i] for i in range(len(text_classes)) if boost_ks.count(k_indices[i]) > 0]
+        
+        nb_traint = []
+        boost_traint = []
+        testt = []
+        for f in features:
+            nb_traint.append([f[i] for i in range(len(f)) if nb_ks.count(k_indices[i]) > 0])
+            boost_traint.append([f[i] for i in range(len(f)) if boost_ks.count(k_indices[i]) > 0])
+            testt.append([f[i] for i in range(len(f)) if k_indices[i] == k])
+            
+        #trainc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] != k]
+        #traint = [features[i] for i in range(len(features)) if k_indices[i] != k]
+        testc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] == k]
+        #testt = [features[i] for i in range(len(features)) if k_indices[i] == k]
+        
+        
+        print 'NB Train texts:', len(nb_traint[0])
+        print 'Boost Train texts:', len(boost_traint[0])
+        print 'Test texts:', len(testt[0])
         #print trainc
         #print testc
     
-        cps, fcps = naivebayes.nb_train(trainc, traint, bins)
-        print 'Classifying..'
-        classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins, top)
+        print 'Training weak classifiers...'
+        classifiers = []
+        for c in range(C):
+            nb = naivebayes.NaiveBayes(bins[c])
+            nb.train(nb_trainc, nb_traint[c])
+            classifiers.append(nb)
+        #cps, fcps = naivebayes.nb_train(trainc, traint, bins)
+        
+        print 'Boosting...'
+        samme = boost.Samme()
+        samme.train(boost_traint, boost_trainc, classifiers, len(distinct_classes), BOOST_ITER)
+    
+        print 'Classifying...'
+        classified = samme.classify(testt)
         
         # --- Calculate performance measures --- #
         class_classified = dict.fromkeys(distinct_classes,0)

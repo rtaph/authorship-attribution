@@ -18,7 +18,7 @@ char_ngram_size = 3
 
 NBINS = 10
 
-BOOST_ITER = 1
+BOOST_ITER = 10
 
 CV_K = 10
 
@@ -30,7 +30,7 @@ output_dir = "/Users/epb/Documents/uni/kandidat/speciale/output/"
 data_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/"
 
 #feature_dirs = ["150_3char", "150_3char_cg", "150_3char_gt", "150_3char_kn", "2000_3char"]
-feature_dirs = ["150_3char", "150_3char_cg"]
+feature_dirs = ["150_3char", "150_3char_cg", "150_3char_kn"]
 corpus = "personae"
 #corpus = "blogs"
 #corpus = "fed"

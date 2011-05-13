@@ -58,6 +58,7 @@ class Samme:
             # Select classifier with lowest error
             for e in range(no_of_classifiers):
                 if min_error == all_errors[e]:
+                    print 'Selected classifier', e
                     self.selected_classifiers[m] = classifiers[e]
                     break
             
@@ -88,9 +89,13 @@ class Samme:
         for i in range(len(wclassified[0])):
             c = collections.defaultdict(lambda: 0)
             for m in range(self.M):
-                guess = wclassified[m][i] 
+                guess = wclassified[m][i][0][0]
+                #print guess
+                #print c
+                #print self.alphas
+                #print c[guess] 
                 c[guess] = c[guess] + self.alphas[m]
-            best_guess = max(c.values)
+            best_guess = max(c.values())
             
             for x in c:
                 if c[x] == best_guess:

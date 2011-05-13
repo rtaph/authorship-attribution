@@ -8,10 +8,9 @@ import util
 from nltk.probability import FreqDist
 from nltk.corpus import PlaintextCorpusReader
 import csv
-import kneserney
 import time
-from goodturing import GoodTuring
 import boost
+import random
 
 n_char_ngrams = 150
 char_ngram_size = 3
@@ -99,9 +98,8 @@ if __name__ == '__main__':
     # All performance measures
     perf = [[None for j in range(7)] for i in range(max(len(distinct_classes),CV_K))]
     
-    no_of_nb_train = (CV_K-1) / 2
-    
-    
+    # No of CV portions for weak classifiers training
+    no_of_nb_train = (CV_K-1) / 2    
     
     for k in range(CV_K):
         
@@ -110,8 +108,10 @@ if __name__ == '__main__':
         non_ks = range(CV_K)
         non_ks.remove(k)
         print 'Non ks', non_ks
-        nb_ks = [non_ks[i] for i in range(len(non_ks)) if i < no_of_nb_train]
-        boost_ks = [non_ks[i] for i in range(len(non_ks)) if i >= no_of_nb_train]
+        #nb_ks = [non_ks[i] for i in range(len(non_ks)) if i % 2 == (k % 2)]
+        nb_ks = random.sample(non_ks,no_of_nb_train)
+        boost_ks = [x for x in non_ks if nb_ks.count(x) == 0]
+        #boost_ks = [non_ks[i] for i in range(len(non_ks)) if i % 2 != (k % 2)]
         print nb_ks
         print boost_ks
         

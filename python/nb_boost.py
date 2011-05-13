@@ -21,20 +21,18 @@ BOOST_ITER = 10
 
 CV_K = 10
 
-top=10
-
 PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb_boost.csv"
 
 output_dir = "/Users/epb/Documents/uni/kandidat/speciale/output/"
 data_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/"
 
 #feature_dirs = ["150_3char", "150_3char_cg", "150_3char_gt", "150_3char_kn", "2000_3char"]
-feature_dirs = ["150_3char", "150_3char_cg", "150_3char_kn"]
-corpus = "personae"
-#corpus = "blogs"
+feature_dirs = ["150_3char", "150_3char_kn"]
+#corpus = "personae"
+corpus = "blogs"
 #corpus = "fed"
-dataset = "p1"
-#dataset = "b1"
+#dataset = "p1"
+dataset = "b1"
 #dataset = "all_known"
 
 
@@ -83,7 +81,7 @@ if __name__ == '__main__':
     # Cross-validation
     print 'Doing cross-validation...'
     k_indices = util.k_fold_cv_ind(text_classes,CV_K)
-    print k_indices
+    #print k_indices
     
     class_p = dict.fromkeys(distinct_classes)
     for c in class_p:
@@ -157,27 +155,33 @@ if __name__ == '__main__':
         class_classified = dict.fromkeys(distinct_classes,0)
         actual = dict.fromkeys(distinct_classes,0)
         correct = dict.fromkeys(distinct_classes,0)
-        top_correct = 0
+        #top_correct = 0
         for i in range(len(classified)):
-            best_classes = [x[0] for x in classified[i]]
+            #best_classes = [x[0] for x in classified[i]]
+            cc = classified[i]
+            tc = testc[i] # test class
+            class_classified[cc] = class_classified[cc] + 1
+            actual[tc] = actual[tc] + 1
+            if cc == tc:
+                correct[cc] = correct[cc] + 1
             
-            if len(best_classes) > 0:
-                cc = best_classes[0] # classified class 
-                tc = testc[i] # test class
-                class_classified[cc] = class_classified[cc] + 1
-                actual[tc] = actual[tc] + 1
-                
-                if cc == tc:
-                    correct[cc] = correct[cc] + 1
-            
-            # Accurracy for for test-classes being in top-X best classes
-            if best_classes.count(tc) > 0:
-                top_correct = top_correct + 1
+            #if len(best_classes) > 0:
+            #    cc = best_classes[0] # classified class
+            #    tc = testc[i] # test class
+            #    class_classified[cc] = class_classified[cc] + 1
+            #    actual[tc] = actual[tc] + 1
+            #    
+            #    if cc == tc:
+            #        correct[cc] = correct[cc] + 1
+            #
+            ## Accurracy for for test-classes being in top-X best classes
+            #if best_classes.count(tc) > 0:
+            #    top_correct = top_correct + 1
         
         # Accuracy for this fold
         acc = sum(correct.values()) / float(len(testc))
         print 'A:', format(100*acc,'.2f')
-        print 'A (top ' + str(top) + "): " + format(100*top_correct / float(len(testc)), '.2f')
+        #print 'A (top ' + str(top) + "): " + format(100*top_correct / float(len(testc)), '.2f')
         perf[k][0] = acc
         
         # Precision and recall for each class for this fold

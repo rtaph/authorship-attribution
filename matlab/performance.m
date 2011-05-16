@@ -14,7 +14,7 @@ for c=1:nClasses
     actualClassesForC = testClasses == c;
     correctClassifiedForC = correctClassified(totalClassifiedForC);
     
-    precision = NaN;
+    precision = 1;
     % We cannot calculate precision if there are no instances classified
     % to the given class
     if sum(totalClassifiedForC) > 0
@@ -24,7 +24,7 @@ for c=1:nClasses
     
     % We cannot calculate recall if there are no instances of a given
     % class in the test set.
-    recall = NaN;
+    recall = 1;
     if sum(actualClassesForC) > 0
         recall = sum(correctClassifiedForC) / sum(actualClassesForC);
     end

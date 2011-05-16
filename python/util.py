@@ -37,17 +37,17 @@ def k_fold_cv_ind(classes, K):
         
     return ind
 
-def avgwith_none(l):
-    suml = 0
-    avgl = None
-    totl = 0 
-    for x in l:
-        if x != None:
-            suml = suml + x
-            totl = totl + 1
-    if totl > 0:
-        avgl = suml / float(totl)
-    return avgl
+#def avgwith_none(l):
+#    suml = 0
+#    avgl = None
+#    totl = 0 
+#    for x in l:
+#        if x != None:
+#            suml = suml + x
+#            totl = totl + 1
+#    if totl > 0:
+#        avgl = suml / float(totl)
+#    return avgl
   
 # TEST
 #k = 4

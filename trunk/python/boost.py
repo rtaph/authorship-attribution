@@ -12,10 +12,6 @@ class Samme:
         '''
         no_of_texts = len(classes)
         print 'Training boosted classifier with', no_of_texts, 'texts'
-        #self.distinct_classes = list(set(classes))
-        #K = len(self.distinct_classes)
-        #self.K = K
-        #print len(features)
         weights = [1/float(no_of_texts) for n in range(no_of_texts)]
         self.classifiers = classifiers
         no_of_classifiers = len(self.classifiers)
@@ -58,7 +54,10 @@ class Samme:
             print 'Errors', all_errors
             min_error = min(all_errors)
             
+            # No more boosting if accuracy is lower than 1/K
             if min_error <= 0 or min_error >= (1-(1/float(K))):
+            #if min_error <= 0 or (1-min_error <= 1/float(K)):
+                print min_error
                 break
             
             # Select classifier with lowest error
@@ -69,7 +68,7 @@ class Samme:
                     break
             
             # Alpha
-            self.alphas[m] = math.log(((1-min_error)/min_error)+math.log(K-1))
+            self.alphas[m] = math.log((1-min_error)/min_error)+math.log(K-1)
             
             # Weight per text (normalized)
             for i in range(no_of_texts):
@@ -109,7 +108,7 @@ class Samme:
                     guess = wclassified[m][i][0][0]
                     c[guess] = c[guess] + self.alphas[m]
             best_guess = max(c.values())
-            print 'Guesses:', c.values(), '- best:', best_guess
+            #print 'Guesses:', c.values(), '- best:', best_guess
             
             for x in c:
                 if c[x] == best_guess:

@@ -220,33 +220,38 @@ if __name__ == '__main__':
         for c in class_p:
             
             # Precision: Correct classified for c / total classified for c
-            p = None
+            p = 1.0
             if class_classified[c] > 0:
                 p = correct[c] / float(class_classified[c])
             class_p[c][k] = p
             foldp.append(p)
         
             # Recall: Correct classified for c / actual classes for c
-            r = None    
+            r = 1.0    
             if actual[c] > 0:
                 r = correct[c] / float(actual[c])
             class_r[c][k] = r
             foldr.append(r)
             
             # F1: Harmonic mean of precision and recall
-            f1 = None
-            if p == 0 and r == 0:
-                f1 = 0
-            elif p is not None and r is not None:
+            f1 = 0.0
+            rp_sum = p + r
+            #if p == 0 and r == 0:
+            #    f1 = 0
+            #elif p is not None and r is not None:
+            if rp_sum != 0:
                 f1 = (2*p*r) / float(r+p)
             class_f1[c][k] = f1
             foldf1.append(f1)
             
         # Average precision, recall and f1 for fold
         #print foldp, foldr, foldf1
-        avgfoldp = util.avgwith_none(foldp)
-        avgfoldr = util.avgwith_none(foldr)
-        avgfoldf1 = util.avgwith_none(foldf1)
+#        avgfoldp = util.avgwith_none(foldp)
+#        avgfoldr = util.avgwith_none(foldr)
+#        avgfoldf1 = util.avgwith_none(foldf1)
+        avgfoldp = sum(foldp) / float(len(foldp))
+        avgfoldr = sum(foldr) / float(len(foldr))
+        avgfoldf1 = sum(foldf1) / float(len(foldf1))
         print 'Avg. P:', format(100*avgfoldp,'.2f')
         print 'Avg. R:', format(100*avgfoldr,'.2f')
         print 'Avg. F1:', format(100*avgfoldf1,'.2f')
@@ -259,17 +264,19 @@ if __name__ == '__main__':
     # Average class precision, recall and f1 for each class
     for i in range(len(class_p)):
         c = class_p.keys()[i]
-        avgcp = util.avgwith_none(class_p[c])
-        avgcr = util.avgwith_none(class_r[c])        
+        avgcp = sum(class_p[c]) / float(len(class_p[c]))
+        avgcr = sum(class_r[c]) / float(len(class_r[c]))
+        #avgcp = util.avgwith_none(class_p[c])
+        #avgcr = util.avgwith_none(class_r[c])        
         #print c, avgcp, avgcr
         perf[i][4] = avgcp
         perf[i][5] = avgcr
-        avgcf1 = None
+        avgcf1 = 0.0
         #print i, avgcp, avgcr
-        if avgcp == 0 and avgcr == 0:
-            avgcf1 = 0
+        if avgcp != 0 and avgcr != 0:
+            #avgcf1 = 0
             #print avgcf1
-        elif avgcp is not None and avgcr is not None:
+        #elif avgcp is not None and avgcr is not None:
             avgcf1 = (2*avgcp*avgcr) / float(avgcp+avgcr)
             #print avgcf1
         perf[i][6] = avgcf1 

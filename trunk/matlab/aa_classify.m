@@ -182,18 +182,18 @@ alarmTrigger = 0.3;
 avgAccuracy = mean(accuracies);
 accuracies
 classPrecisions
-avgClassPrecisions = meanwithnan(classPrecisions,2)
-avgFoldPrecisions = meanwithnan(classPrecisions,1)
+avgClassPrecisions = mean(classPrecisions,2)
+avgFoldPrecisions = mean(classPrecisions,1)
 
 % Alarm if low precision found
 if sum(isnan(avgClassPrecisions)) > 0 || sum(avgClassPrecisions<=alarmTrigger) > 0
     %fprintf('!!!!!!!!!!!!!!!! WARNING !!!!!!!!!!!!!');
     %avgClassPrecisions
 end
-avgPrecision = meanwithnan(avgClassPrecisions',2);
+avgPrecision = mean(avgClassPrecisions',2);
 classRecalls
-avgClassRecalls = meanwithnan(classRecalls,2)
-avgFoldRecalls = meanwithnan(classRecalls,1)
+avgClassRecalls = mean(classRecalls,2)
+avgFoldRecalls = mean(classRecalls,1)
 
 % Alarm if low recall found
 if sum(isnan(avgClassRecalls)) > 0 || sum(avgClassRecalls<=alarmTrigger) > 0
@@ -205,11 +205,11 @@ avgRecall = meanwithnan(avgClassRecalls',2);
 % F1 is calculated from the averages of precisions and recalls
 %classF1s
 %avgClassF1s = meanwithnan(classF1s,2)
-avgClassF1s = nan(nClasses,1);
+avgClassF1s = zeros(nClasses,1);
 for i=1:nClasses
     avgClassF1s(i) = f1(avgClassPrecisions(i), avgClassRecalls(i));
 end
-avgFoldF1s = nan(1,k);
+avgFoldF1s = zeros(1,k);
 avgClassF1s
 for i=1:k
     avgFoldF1s(i) = f1(avgFoldPrecisions(i),avgFoldRecalls(i));
@@ -239,10 +239,8 @@ fprintf('\n------------------------- Done -------------------------\n\n');
 
 
 function f = f1(p,r)
-f = nan;
-if p == 0 && r == 0
-    f = 0;
-elseif ~isnan(p) && ~isnan(r)
+f = 0;
+if p != 0 && r != 0
     f = (2*p*r) / (p+r);
 end
 

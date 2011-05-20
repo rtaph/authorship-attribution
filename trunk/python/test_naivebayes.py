@@ -8,8 +8,8 @@ import kneserney
 import time
 from goodturing import GoodTuring
 
-n_char_ngrams = 150
-char_ngram_size = 3
+#n_char_ngrams = 150
+#char_ngram_size = 3
 
 NBINS = 10
 
@@ -32,8 +32,14 @@ PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb.csv"
 output_dir = "/Users/epb/Documents/uni/kandidat/speciale/output/"
 data_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/"
 
-feature_dir = "150_3char"
+feature_dir = "150_3char_kn"
 corpus = "personae"
+#corpus = "almedad"
+#dataset = "al2"
+#corpus = "fed"
+#dataset = "all_known"
+#corpus = "ansar1"
+#dataset = "an2"
 dataset = "p1"
 #corpus = "blogs"
 #dataset = "b1"
@@ -47,7 +53,7 @@ if __name__ == '__main__':
     print 'Dataset:', dataset
     feature_file = output_dir + corpus + "/" + feature_dir + "/" + dataset + ".out.txt"
     print 'Features:', feature_file
-    print 'N-grams:', n_char_ngrams
+    #print 'N-grams:', n_char_ngrams
     
     corpus_root = data_dir + corpus + "/" + dataset
     print 'Corpus:', corpus_root
@@ -60,7 +66,7 @@ if __name__ == '__main__':
     #    print t
     text_classes = fextract_helper.find_classes(texts)
     ntexts = len(texts)
-    distinct_classes = list(set(text_classes))  
+    distinct_classes = list(set(text_classes))
     
     print 'Loading features'
     features = fextract_helper.load_features(feature_file)
@@ -184,7 +190,7 @@ if __name__ == '__main__':
         #cps, fcps = naivebayes.nb_train(trainc, traint, bins)
         print 'Classifying..'
         #classified = naivebayes.nb_classify(cps, fcps, testc, testt, bins, top)
-        classified = nb.classify(testc, testt, top)
+        classified = nb.classify(testt, top)
         
         # --- Calculate performance measures --- #
         class_classified = dict.fromkeys(distinct_classes,0)

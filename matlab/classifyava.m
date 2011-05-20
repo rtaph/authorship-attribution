@@ -17,7 +17,7 @@ function classified = classifyava(trainData, trainClasses, testData, nClasses, k
 % classified: A vector of length sum(testIndices), with a the class of each
 % text in the test-set.
 
-iters = 50;
+iters = 1000;
 
 % testIndices: A vector (n x 1) of logical indices of the classes used for
 % test.

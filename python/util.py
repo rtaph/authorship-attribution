@@ -28,6 +28,7 @@ def k_fold_cv_ind(classes, K):
     
     sorted_bla = sorted(bla,key=operator.itemgetter(0))
     
+    #print sorted_bla
     ind = [0 for i in range(len(classes))]
     x = 0
     for s in sorted_bla:
@@ -69,7 +70,7 @@ def k_fold_cv_ind(classes, K):
     
     
     
-#print k_fold_cv_ind([1,1,1,1,2,2,1,1,3,3,3,3,3,2,2,2,2,2,1,1,2,2,2,2,3,3,3,3,3,3,3,3,3,3,3], 3)
+#print k_fold_cv_ind(['A','A','A','A','B','B','A','A','C','C','C','C','C','B','B','B','B','B','A','A','B','B','B','B','C','C','C','C','C','C','C','C','C','C','C'], 3)
 
 #for x in k_fold_cv([[1,2,3,4,5,6,7],[8,9,5,6,7,8,9],[0,0,0,0,10,10,10]],2):
 #    print x

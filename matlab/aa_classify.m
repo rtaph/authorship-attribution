@@ -43,10 +43,10 @@ performanceFile = '/Users/epb/Documents/uni/kandidat/speciale/code/perf_svm.csv'
 %outputFolder = '/home/epb/Documents/output/';
 outputFolder = '/Users/epb/Documents/uni/kandidat/speciale/output/';
 
-%outFile = 'personae/150_3char/p3.out.txt'
-%catFile = 'personae/150_3char/p3.cat.txt'
-outFile = 'fed/2000_3char_kn/f2.out.txt'
-catFile = 'fed/2000_3char_kn/f2.cat.txt'
+outFile = 'personae/2000_3char_cg/p2.out.txt'
+catFile = 'personae/2000_3char_cg/p2.cat.txt'
+%outFile = 'fed/2000_3char_kn/f2.out.txt'
+%catFile = 'fed/2000_3char_kn/f2.cat.txt'
 %outFile = 'blogs/150_3char_150_3wrd/a1_005_10.out.txt'
 %catFile = 'blogs/150_3char_150_3wrd/a1_005_10.cat.txt'
 %outFile = '../code/out.txt'
@@ -240,7 +240,7 @@ fprintf('\n------------------------- Done -------------------------\n\n');
 
 function f = f1(p,r)
 f = 0;
-if p != 0 && r != 0
+if p ~= 0 && r ~= 0
     f = (2*p*r) / (p+r);
 end
 

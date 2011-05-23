@@ -18,7 +18,7 @@ FUNC_FOLDER = "/Users/epb/Documents/uni/kandidat/speciale/data/func_words_eng_zl
 
 CG_REPR = False
 KN_SMOOTH = False
-GT_SMOOTH = True
+GT_SMOOTH = False
 
 # output files
 FEATURE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/out.txt"
@@ -29,11 +29,11 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 # folder with corpus
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_known"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/a1_005_10"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blogs/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/ansar1/an2"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/dw/almedad/al2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/ansar1/an2"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/almedad/al2"
 
 # Get options from command line
 a = 0
@@ -102,34 +102,43 @@ if char_ngrams:
     a, t = fextract_helper.char_ngram_stats(corpus.fileids(), corpus, \
                                             char_ngram_size, CG_REPR or KN_SMOOTH)
     e1 = time.time()
-    print 'Finding took', e1-s1, 'seconds'
-    #print a.items()[:10]
-    #for bla in t:
-    #    for b in bla:
-    #        print b.items()[:20]
+    print 'Char: Finding took', e1-s1, 'seconds'
+    
     s1 = time.time()
-    #freqs = FreqDist(a)
-    #tot_cngs = min([n_char_ngrams, freqs.B()])
     tot_cngs = min([n_char_ngrams, a.B()])
     mostfreq_ngs = a.keys()[:tot_cngs]
+    #print len(mostfreq_ngs)
     e1 = time.time()
-    print 'Calc took', e1-s1, 'seconds'
-    #feat_charngram = fextract_helper.create_char_ngrams(n_char_ngrams, a, t)
+    print 'Char: Calc took', e1-s1, 'seconds'
+    
     s1 = time.time()
     feat_charngram = fextract_helper.create_ngram_feats(mostfreq_ngs, char_ngram_size, \
                                                         t, CG_REPR or KN_SMOOTH, \
                                                         KN_SMOOTH, GT_SMOOTH)
     e1 = time.time()
-    print 'Creating took', e1-s1, 'seconds'
+    print 'Char: Creating took', e1-s1, 'seconds'
     
     
 if wrd_ngrams:
-    a, t = fextract_helper.wrd_ngram_stats(corpus.fileids(), corpus, n_char_ngrams, char_ngram_size)
-    freqs = FreqDist(a)
-    tot_wngs = min([n_wrd_ngrams, freqs.B()])
-    mostfreq_ngs = freqs.keys()[:tot_wngs]
-    #feat_wrdgram = fextract_helper.create_wrd_ngrams(n_wrd_ngrams, a, t)
-    feat_wrdgram = fextract_helper.create_ngram_feats(mostfreq_ngs, wrd_ngram_size, t)
+    s1 = time.time()
+    a, t = fextract_helper.wrd_ngram_stats(corpus.fileids(), corpus, \
+                                           wrd_ngram_size, CG_REPR or KN_SMOOTH)
+    e1 = time.time()
+    print 'Word: Finding took', e1-s1, 'seconds'
+    
+    s1 = time.time()
+    tot_wngs = min([n_wrd_ngrams, a.B()])
+    mostfreq_wngs = a.keys()[:tot_wngs]
+    e1 = time.time()
+    print 'Word: Calc took', e1-s1, 'seconds'
+    
+    s1 = time.time()
+    feat_wrdgram = fextract_helper.create_ngram_feats(mostfreq_wngs, wrd_ngram_size, \
+                                                      t, CG_REPR or KN_SMOOTH, \
+                                                      KN_SMOOTH, GT_SMOOTH)
+    e1 = time.time()
+    print 'Word: Creating took', e1-s1, 'seconds'
+    
 if function_words:
     func_wds, text_func_wrds = fextract_helper.extract_fws(corpus.fileids(), corpus, FUNC_FOLDER)
     feat_funcwrds = fextract_helper.create_fw_features(func_wds, text_func_wrds)

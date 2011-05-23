@@ -35,6 +35,49 @@ def load_wrds(dir, cmt="//"):
             f.close()
     return wrds
 
+def wrd_ngram_stats(texts, corpus, order, include_lower=False):
+    #n_texts = len(texts)
+    #feature_matrix = [[] for i in range(n_texts)]
+    
+    all_wd_ngrams = FreqDist()
+    text_wrd_ngrams = []
+    
+    for text in texts:
+        
+        if not text.endswith(".txt"):
+            continue
+        
+        wrd_tokens = corpus.words(text)
+        empty = len(corpus.raw(text)) == 0
+        
+        # One freq. dist per n
+        text_ngrams = []
+        for _ in range(order):
+            text_ngrams.append(FreqDist())
+
+        if not empty:
+            lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
+            
+            if include_lower:
+                for n in range(1, order+1):
+                    wd_ng = ngrams(lower_wrds, n)
+                    text_ngrams[n-1].update(wd_ng)
+                    if n == order:
+                        all_wd_ngrams.update(wd_ng)
+            else:
+                wd_ng = ngrams(lower_wrds, order)
+                text_ngrams[order-1].update(wd_ng)
+                all_wd_ngrams.update(lower_wrds)
+                
+#            wrd_ng = ngrams(lower_wrds, wrd_ngram_size)
+#            text_wrd_ngrams.append(wrd_ng)
+#            all_wd_ngrams.extend(wrd_ng)
+        #else:
+        #    text_wrd_ngrams.append([])
+        text_wrd_ngrams.append(text_ngrams)
+            
+    return all_wd_ngrams, text_wrd_ngrams
+
 def char_ngram_stats(texts, corpus, order, include_lower=False):
     '''
     Find character n-grams in some texts.
@@ -172,249 +215,53 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
     
     return feature_matrix
 
-# OLD VERSION WHERE NO FREQDIST WAS MADE FOR EACH LIST OF NGRAMS
-#def char_ngram_stats(texts, corpus, order, include_lower=False):
+##  Only used for multi-version
+
+#def get_text_cngs(texts, corpus_root, ngram_size):
 #    '''
-#    Find character n-grams in some texts.
-#    @param texts: List of texts
-#    @param corpus: The corpus that holds the texts
-#    @param order: The order of the n-grams to consider.
-#    @param include_lower: Whether to include list of lower-order n-grams in output
-#    @return: A tuple: First element is a list of all n-grams (only of
-#    given order) across all texts. Second element is a a matrix with a list of
-#    lists of 1-grams, 2-grams, ..., n-grams per text.
-#    ''' 
+#    For each text, get a list of all char n-grams occurring the text
+#    '''
 #    
-#    all_char_ngrams = [] # All n-grams found in entire corpus
-#    text_char_ngrams = [] # Char n-grams found in each text
-#    
+#    ngs = []
+#    corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
 #    for text in texts:
-#        #print text
 #        
 #        if not text.endswith(".txt"):
 #            continue
-#        
-#        empty = len(corpus.raw(text)) == 0 
 #    
-#        # One list per n
-#        text_ngrams = []
-#        for _ in range(order):
-#            text_ngrams.append([])
-#            
-#        if not empty:
+#        if not len(corpus.raw(text)) == 0:
 #            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
+#            char_ng = ngrams(text_str, ngram_size)
+#            ngs.append(char_ng)
+#        else:
+#            ngs.append([])
 #            
-#            if include_lower:
-#                for n in range(1, order+1):
-#                    char_ng = ngrams(text_str, n)
-#                    text_ngrams[n-1] = char_ng
-#                    if n == order:
-#                        all_char_ngrams.extend(char_ng)
-#            else:
-#                char_ng = ngrams(text_str, order)
-#                text_ngrams[order-1] = char_ng
-#                all_char_ngrams.extend(char_ng)
-#            
-#        text_char_ngrams.append(text_ngrams)
-#            
-#    return all_char_ngrams, text_char_ngrams
+#    return ngs
 
-# TODO: Only used for multi-version
-def get_text_cngs(texts, corpus_root, ngram_size):
-    '''
-    For each text, get a list of all char n-grams occurring the text
-    '''
-    
-    ngs = []
-    corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
-    for text in texts:
-        
-        if not text.endswith(".txt"):
-            continue
-    
-        if not len(corpus.raw(text)) == 0:
-            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-            char_ng = ngrams(text_str, ngram_size)
-            ngs.append(char_ng)
-        else:
-            ngs.append([])
-            
-    return ngs
+## Only used for multi-version ##
 
-# TODO: Only used for multi-version
-def get_cngs(texts, corpus_root, ngram_size):
-    '''
-    Get a list of all char n-grams occurring in some texts
-    '''
-    
-    ngs = []
-    
-    corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
-    for text in texts:
-        
-        if not text.endswith(".txt"):
-            continue
-    
-        if not len(corpus.raw(text)) == 0:
-            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-            char_ng = ngrams(text_str, ngram_size)
-            ngs.extend(char_ng)
-            
-    return ngs 
-
-    
-# OLD VERSION WHERE INPUT WAS LIST OF NGRAMS NOT FREQDIST
-#def create_ngram_feats(ngrams, order, text_ngrams, cg_representation=False, kn_smooth=False, gt_smooth=False, gt_renorm=True, gt_p0=True):
+#def get_cngs(texts, corpus_root, ngram_size):
 #    '''
-#    Create n-gram features for each text, using the list of n-grams
-#    to consider given in ngrams argument. Can be used for both
-#    chars and words
-#    @param order: Size of n-gram, where order > 1
-#    @param cg_representation: The probability of an ngram is calculated as in CG98
-#    @param kn_smooth: Whether to use Kneser-Ney smoothing
+#    Get a list of all char n-grams occurring in some texts
 #    '''
 #    
-#    # We can only use one kind of smoothing
-#    if kn_smooth and gt_smooth:
-#        print 'Cannot use two types of smoothing. Exiting...'
-#        exit()
+#    ngs = []
 #    
-#    n_texts = len(text_ngrams)
-#    print os.getpid(), ": Creating n-grams features for", n_texts, "texts"
-#    feature_matrix = [[] for i in range(n_texts)]
+#    corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
+#    for text in texts:
+#        
+#        if not text.endswith(".txt"):
+#            continue
 #    
-#    #start = time.time()
-#    # Select char n-gram features
-#    for t in range(n_texts):
-#        
-#        # Frequencies for n-gram
-#        freqs = FreqDist(text_ngrams[t][order-1])
-#        
-#        # Frequencies for n-1-gram
-#        if cg_representation or kn_smooth:
-#            allfreqdists = []
-#            for l in text_ngrams[t]:
-#                allfreqdists.append(FreqDist(l))
-#            #lowerord_fd = FreqDist(text_ngrams[t][order-2])
-#        
-#        if gt_smooth:
+#        if not len(corpus.raw(text)) == 0:
+#            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
+#            char_ng = ngrams(text_str, ngram_size)
+#            ngs.extend(char_ng)
 #            
-#            # TODO: Gt smoothing does not use CG representation
-#            
-#            # Frequencies
-#            rl = sorted(list(set(freqs.values()))) # list of r
-#            # Frequencies of frequencies
-#            nrl = []
-#            for r in rl:
-#                nrl.append(freqs.Nr(r))
-#            #print rl
-#            #print nrl
-#            
-#            # Find parameters for smoothed Nr
-#            a, b, X = goodturing.gt_nr_smooth(rl, nrl)
-#            N = freqs.N()
-#            p0_all = 1.0
-#            if N > 0: 
-#                p0_all = freqs.Nr(1) / float(N) # Probability for all unseen objects
-#            #print 'p0_all', p0_all
-#            # Dict of r,r*
-#            #print 'X', X
-#            
-#            
-#            rsl = goodturing.gt_r_est(rl, nrl, a, b, X)
-#            #print rsl
-#            # Nstar is the total number of objects, using estimated r
-#            Nstar = 0
-#            for p in rsl.items():
-#                Nr = freqs.Nr(p[0])
-#                Nstar = Nstar + (Nr * p[1])
-#            #if Nstar == 0:
-#            #    print 'X', X
-#            #    print freqs.items()
-#            
-#            # Calculate p0 for unseen (r == 0) ngrams
-#            unseen = 0
-#            for ngram in ngrams:
-#                if freqs[ngram] == 0: # This checks r == 0
-#                    unseen = unseen + 1
-#            if unseen > 0:
-#                p0 = p0_all / float(unseen)   
-#                print 'Unseen', unseen, 'p0', p0         
-#        
-#        # Step through X most frequent n-grams across corpus, the feature is the
-#        # relative frequency for each n-gram in each text 
-#        for ngram in ngrams:
-#            
-#            if cg_representation:
-#                freq = 0
-#                occurrences = freqs[ngram]
-#                if occurrences > 0:
-#                    lowerord_ng = ngram[:-1]
-#                    c_sum = allfreqdists[order-2][lowerord_ng]
-#                    #print ngram, lowerord_ng, occurrences, c_sum
-#                    freq = occurrences / float(c_sum)
-#                if ngram == (u't', u'h', u'e'):
-#                    print ngram, occurrences, c_sum, freq, freqs.freq(ngram)
-#            else:
-#                freq = freqs.freq(ngram)
-#            
-#            #if freq == 0:
-#            #    unseen = unseen + 1
-#            #print 'freq', freq
-#            if gt_smooth:
-#                r = freqs[ngram]
-#                if r > 0: # GT smoothing for seen objects
-#                    rstar = rsl[r]
-#                    pr = rstar/float(N)
-#                    #print ngram, pr
-#                    # re-normalize probability
-#                    if gt_renorm:
-#                        freq = (1-p0_all)*(rstar/Nstar)
-#                    else:
-#                        freq = pr
-#                elif gt_p0:
-#                    freq = p0
-#                
-#                #print ngram, freq
-#                #if freqs[ngram] > 0 and a is not None and \
-#                #b is not None and b <= -1:
-#                #    freq = gt_r_est(freqs, N, ngram, a, b, X)
-#                
-#            feature_matrix[t].append(freq)
-#        
-#        #print sum(feature_matrix[t])
-#            
-#    #end = time.time()
-#    #print os.getpid(), ": Used", (end-start)/n_texts, "seconds per text"
-#    
-#    return feature_matrix
+#    return ngs 
 
-
-# TODO: Has only been used for baseline tests
-def wrd_ngram_stats(texts, corpus, n_wrd_ngrams, wrd_ngram_size):
-    n_texts = len(texts)
-    feature_matrix = [[] for i in range(n_texts)]
     
-    all_wd_ngrams = []
-    text_wrd_ngrams = []
-    
-    for text in texts:
-        
-        if not text.endswith(".txt"):
-            continue
-        
-        wrd_tokens = corpus.words(text)
-        empty = len(corpus.raw(text)) == 0
 
-        if not empty:
-            lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
-            wrd_ng = ngrams(lower_wrds, wrd_ngram_size)
-            text_wrd_ngrams.append(wrd_ng)
-            all_wd_ngrams.extend(wrd_ng)
-        else:
-            text_wrd_ngrams.append([])
-            
-    return all_wd_ngrams, text_wrd_ngrams
    
 # TODO: Not used(?)
 def extract_fws(texts, corpus, fw_root):

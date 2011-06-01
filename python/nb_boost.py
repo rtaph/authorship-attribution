@@ -12,12 +12,9 @@ import time
 import boost
 import random
 
-n_char_ngrams = 150
-char_ngram_size = 3
-
 NBINS = 10
 
-BOOST_ITER = 100
+BOOST_ITER = 500
 
 CV_K = 10
 
@@ -26,28 +23,26 @@ PERFORMANCE_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/perf_nb_boos
 output_dir = "/Users/epb/Documents/uni/kandidat/speciale/output/"
 data_dir = "/Users/epb/Documents/uni/kandidat/speciale/data/"
 
-#feature_dirs = ["150_3char", "150_3char_cg", "150_3char_gt", "150_3char_kn", "2000_3char"]
-feature_dirs = ["150_3char", "150_3char_kn", "150_3char_cg"]
-corpus = "personae"
+#feature_dirs = ["150_3char", "150_3char_cg", "150_3char_gt", "150_3char_kn", "2000_3char", "2000_3char_cg", "2000_3char_gt", "2000_3char_kn"]
+feature_dirs = ["150_1char", "150_2char", "150_3char", "150_4char", "150_1wrd", "150_2wrd", "150_3wrd", "150_4wrd"]
+#corpus = "personae"
+#dataset = "p1"
 #corpus = "blogs"
-#corpus = "fed"
-dataset = "p1"
 #dataset = "b1"
-#dataset = "all_known"
+corpus = "fed"
+dataset = "f2"
 
 
 if __name__ == '__main__':
     
     C = len(feature_dirs)
     print 'No. of classifiers', C
-    #print 'Corpus:', corpus
     print 'Dataset:', dataset
     feature_files = [] 
     for d in feature_dirs:
         feature_file = output_dir + corpus + "/" + d + "/" + dataset + ".out.txt"
         print 'Features:', feature_file
         feature_files.append(feature_file)
-    print 'N-grams:', n_char_ngrams
     
     corpus_root = data_dir + corpus + "/" + dataset
     
@@ -55,8 +50,6 @@ if __name__ == '__main__':
     
     corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
     texts = corpus.fileids()
-    #for t in texts:
-    #    print t
     text_classes = fextract_helper.find_classes(texts)
     ntexts = len(texts)
     distinct_classes = list(set(text_classes))
@@ -74,14 +67,10 @@ if __name__ == '__main__':
     for f in features:
         my_bins = naivebayes.build_feat_bins(f, NBINS)
         bins.append(my_bins)
-    #print 'bins', bins, len(bins)
-    #d = 3
-    #feature_bins = int(math.pow(10, d))
     
     # Cross-validation
     print 'Doing cross-validation...'
     k_indices = util.k_fold_cv_ind(text_classes,CV_K)
-    #print k_indices
     
     class_p = dict.fromkeys(distinct_classes)
     for c in class_p:
@@ -106,10 +95,8 @@ if __name__ == '__main__':
         non_ks = range(CV_K)
         non_ks.remove(k)
         print 'Non ks', non_ks
-        #nb_ks = [non_ks[i] for i in range(len(non_ks)) if i % 2 == (k % 2)]
         nb_ks = random.sample(non_ks,no_of_nb_train)
         boost_ks = [x for x in non_ks if nb_ks.count(x) == 0]
-        #boost_ks = [non_ks[i] for i in range(len(non_ks)) if i % 2 != (k % 2)]
         print nb_ks
         print boost_ks
         
@@ -124,17 +111,11 @@ if __name__ == '__main__':
             boost_traint.append([f[i] for i in range(len(f)) if boost_ks.count(k_indices[i]) > 0])
             testt.append([f[i] for i in range(len(f)) if k_indices[i] == k])
             
-        #trainc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] != k]
-        #traint = [features[i] for i in range(len(features)) if k_indices[i] != k]
         testc = [text_classes[i] for i in range(len(text_classes)) if k_indices[i] == k]
-        #testt = [features[i] for i in range(len(features)) if k_indices[i] == k]
-        
         
         print 'NB Train texts:', len(nb_traint[0])
         print 'Boost Train texts:', len(boost_traint[0])
         print 'Test texts:', len(testt[0])
-        #print trainc
-        #print testc
     
         print 'Training weak classifiers...'
         classifiers = []
@@ -142,7 +123,6 @@ if __name__ == '__main__':
             nb = naivebayes.NaiveBayes(bins[c])
             nb.train(nb_trainc, nb_traint[c])
             classifiers.append(nb)
-        #cps, fcps = naivebayes.nb_train(trainc, traint, bins)
         
         print 'Boosting...'
         samme = boost.Samme()
@@ -157,31 +137,16 @@ if __name__ == '__main__':
         correct = dict.fromkeys(distinct_classes,0)
         #top_correct = 0
         for i in range(len(classified)):
-            #best_classes = [x[0] for x in classified[i]]
             cc = classified[i]
             tc = testc[i] # test class
             class_classified[cc] = class_classified[cc] + 1
             actual[tc] = actual[tc] + 1
             if cc == tc:
                 correct[cc] = correct[cc] + 1
-            
-            #if len(best_classes) > 0:
-            #    cc = best_classes[0] # classified class
-            #    tc = testc[i] # test class
-            #    class_classified[cc] = class_classified[cc] + 1
-            #    actual[tc] = actual[tc] + 1
-            #    
-            #    if cc == tc:
-            #        correct[cc] = correct[cc] + 1
-            #
-            ## Accurracy for for test-classes being in top-X best classes
-            #if best_classes.count(tc) > 0:
-            #    top_correct = top_correct + 1
         
         # Accuracy for this fold
         acc = sum(correct.values()) / float(len(testc))
         print 'A:', format(100*acc,'.2f')
-        #print 'A (top ' + str(top) + "): " + format(100*top_correct / float(len(testc)), '.2f')
         perf[k][0] = acc
         
         # Precision and recall for each class for this fold
@@ -213,10 +178,6 @@ if __name__ == '__main__':
             foldf1.append(f1)
             
         # Average precision, recall and f1 for fold
-        #print foldp, foldr, foldf1
-        #avgfoldp = util.avgwith_none(foldp)
-        #avgfoldr = util.avgwith_none(foldr)
-        #avgfoldf1 = util.avgwith_none(foldf1)
         avgfoldp = sum(foldp) / float(len(foldp))
         avgfoldr = sum(foldr) / float(len(foldr))
         avgfoldf1 = sum(foldf1) / float(len(foldf1))
@@ -226,27 +187,17 @@ if __name__ == '__main__':
         perf[k][1] = avgfoldp
         perf[k][2] = avgfoldr
         perf[k][3] = avgfoldf1
-        
-        #print 'After', class_p, class_r
     
     # Average class precision, recall and f1 for each class
     for i in range(len(class_p)):
         c = class_p.keys()[i]
-        #avgcp = util.avgwith_none(class_p[c])
-        #avgcr = util.avgwith_none(class_r[c])
         avgcp = sum(class_p[c]) / float(len(class_p[c]))
         avgcr = sum(class_r[c]) / float(len(class_r[c]))
-        #print c, avgcp, avgcr
         perf[i][4] = avgcp
         perf[i][5] = avgcr
         avgcf1 = 0.0
-        #print i, avgcp, avgcr
         if avgcp != 0 and avgcr != 0:
-#            avgcf1 = 0
-#            #print avgcf1
-#        elif avgcp is not None and avgcr is not None:
             avgcf1 = (2*avgcp*avgcr) / float(avgcp+avgcr)
-            #print avgcf1
         perf[i][6] = avgcf1 
     
     # ----- Write performance measures to file ----- #

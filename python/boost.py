@@ -105,10 +105,12 @@ class Samme:
             c = collections.defaultdict(lambda: 0)
             for m in range(self.M):
                 if self.alphas[m] > 0:
-                    guess = wclassified[m][i][0][0]
+                    # [0][0] because a list of best guesses is returned from Naive Bayes
+                    guess = wclassified[m][i][0][0] 
+                    #print guess
                     c[guess] = c[guess] + self.alphas[m]
             best_guess = max(c.values())
-            #print 'Guesses:', c.values(), '- best:', best_guess
+            #print 'Guesses:', c, '- best:', best_guess
             
             for x in c:
                 if c[x] == best_guess:

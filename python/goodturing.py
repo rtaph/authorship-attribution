@@ -50,24 +50,16 @@ class GoodTuring:
             
             if self._a is not None and self._b is not None and self._b <= -1: 
                 if nr == 0 or r >= self._X: # Good-Turing estimate for high r
-                    #nr = math.pow(10, a + (b*math.log10(r)))
                     nr = math.exp(self._a + (self._b*math.log(r)))
                 if r+1 >= self._X:
                     nr1 = math.exp(self._a + (self._b*math.log(r+1)))
         
-            
-            #print 'blu', r, math.pow(10, a + (b*math.log10(r)))
             rstar = (r+1) * (nr1/float(nr)) # calculate r*
-            #print 'r, rstar', r, rstar
             if rstar > 0:
                 self._rsl[r] = rstar
             else:
                 self._rsl[r] = r # Occurs when too few seen objects
-        
-        #print self._rsl
-        #return rsl
     
-    #def _gt_nr_smooth(self, rl, nrl):
     def _gt_nr_smooth(self):
         '''
         Smooth Nr-parameter for Good-Turing smoothing
@@ -82,24 +74,17 @@ class GoodTuring:
         self._X = None
         
         CONFID_FACTOR = 1.96 # Adapted from http://www.grsampson.net/D_SGT.c
-        #CONFID_FACTOR = 1.65
         if len(self._rl) < 2:
             # There are too few (r,Nr)-pairs to smooth Nr
-            #return None, None, None
             return
         logzr = []
         for i in range(len(self._rl)):
             nr = self._nrl[i]
             l = self._rl[i-1] if i > 0 else 0
             k = self._rl[i+1] if i != len(self._rl)-1 else 2*self._rl[i]-l
-            #if i > 0 and i < len(rl)-1:
-            #zr = (2*nr)/float(rl[i+1]-rl[i-1])
             zr = (2*nr)/float(k-l)
-            #print 'l', nr, k, l, zr
-            #print zr
             logzr.append(math.log(zr))
         logr = [math.log(x) for x in self._rl]
-        #print 'g', logr, logzr
         self._a, self._b = util.slr(logr, logzr)
         
         # Find point (r) where to start using smoothed Nr's. This is
@@ -119,16 +104,10 @@ class GoodTuring:
             stdv = math.sqrt((r+1)*(r+1)*(nr1/(nr*nr))*(1+(nr1/nr)))
             urs = (r+1)*nr1 / float(nr) # Unsmoothed r*
             srs = (r+1)*snr1 / float(snr) # Smoothed r*
-            #print r, stdv, nr, snr, srs, urs
-            
-            # OLD: If the difference between Nr and smoothed Nr has dropped
-            # below CONFID_FACTOR * standard deviation, the Nr is no longer
-            # significantly different and we will use smoothed Nr from here
             
             # If the difference between r* and smoothed r* has dropped
             # below CONFID_FACTOR * standard deviation, the r* is no longer
             # significantly different and we will use smoothed r* from here
-            #if math.fabs(nr-snr) <= CONFID_FACTOR * stdv:
             if math.fabs(urs-srs) <= CONFID_FACTOR * stdv:
                 self._X = r
                 #print 'X',X
@@ -171,8 +150,3 @@ class GoodTuring:
             return self._prob_unrenorm(r) * self._renorm
         else:
             return self._p0
-
-# TEST
-#rl = [1,2,3,4,5,6,7,400,1918]
-#nrl = [268,112,70,41,24,14,15,1,1]
-#print gt_nr_smooth(rl, nrl)

@@ -1,4 +1,5 @@
 function [accuracy, classPrecisions, classRecalls, classF1s] = performance (classified, testClasses,nClasses)
+% Calculate performance measures
 
 correctClassified = classified == testClasses;
 

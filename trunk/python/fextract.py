@@ -27,13 +27,13 @@ CATEGORY_FILE = "/Users/epb/Documents/uni/kandidat/speciale/code/cat.txt"
 #CATEGORY_FILE = "/home/epb/Documents/code/cat.txt"
 
 # folder with corpus
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed_papers/all_known"
-#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p1"
+corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/fed/f2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/personae/p2"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blogs/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/blog_corpus/b1"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/test/test1_64"
 #corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/ansar1/an2"
-corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/almedad/al2"
+#corpus_root = "/Users/epb/Documents/uni/kandidat/speciale/data/almedad/al2"
 
 # Get options from command line
 a = 0
@@ -129,6 +129,10 @@ if wrd_ngrams:
     s1 = time.time()
     tot_wngs = min([n_wrd_ngrams, a.B()])
     mostfreq_wngs = a.keys()[:tot_wngs]
+    #print wrd_ngram_size
+    #print len(mostfreq_wngs)
+    #print mostfreq_wngs[:10]
+    #exit()
     e1 = time.time()
     print 'Word: Calc took', e1-s1, 'seconds'
     

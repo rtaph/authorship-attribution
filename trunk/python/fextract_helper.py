@@ -36,8 +36,6 @@ def load_wrds(dir, cmt="//"):
     return wrds
 
 def wrd_ngram_stats(texts, corpus, order, include_lower=False):
-    #n_texts = len(texts)
-    #feature_matrix = [[] for i in range(n_texts)]
     
     all_wd_ngrams = FreqDist()
     text_wrd_ngrams = []
@@ -67,13 +65,8 @@ def wrd_ngram_stats(texts, corpus, order, include_lower=False):
             else:
                 wd_ng = ngrams(lower_wrds, order)
                 text_ngrams[order-1].update(wd_ng)
-                all_wd_ngrams.update(lower_wrds)
+                all_wd_ngrams.update(wd_ng)
                 
-#            wrd_ng = ngrams(lower_wrds, wrd_ngram_size)
-#            text_wrd_ngrams.append(wrd_ng)
-#            all_wd_ngrams.extend(wrd_ng)
-        #else:
-        #    text_wrd_ngrams.append([])
         text_wrd_ngrams.append(text_ngrams)
             
     return all_wd_ngrams, text_wrd_ngrams
@@ -94,7 +87,6 @@ def char_ngram_stats(texts, corpus, order, include_lower=False):
     text_char_ngrams = [] # Char n-grams found in each text
     
     for text in texts:
-        #print text
         
         if not text.endswith(".txt"):
             continue
@@ -143,17 +135,13 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
     print os.getpid(), ": Creating n-grams features for", n_texts, "texts"
     feature_matrix = [[] for i in range(n_texts)]
     
-    #start = time.time()
     # Select char n-gram features
     for t in range(n_texts):
         
         # Frequencies for n-gram
-        #freqs = FreqDist(text_ngrams[t][order-1])
-        freqs = text_fds[t][order-1]
-        
+        freqs = text_fds[t][order-1]        
         if gt_smooth:
             
-            # TODO: Gt smoothing does not use CG representation
             gts = []
             
             # Frequencies
@@ -167,28 +155,20 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
             for ngram in ngrams:
                 if freqs[ngram] == 0: # This checks r == 0
                     unseen = unseen + 1
-            #print 'un', unseen, freqs.B()
                 
             gt = GoodTuring(rl, nrl, freqs.N(), unseen)
-            #gt_freq = SimpleGoodTuringProbDist(freqs, freqs.B()+unseen)
         
         # Step through X most frequent n-grams across corpus, the feature is the
         # relative frequency for each n-gram in each text 
         for ngram in ngrams:
             
-            #if freq == 0:
-            #    unseen = unseen + 1
-            #print 'freq', freq
             if gt_smooth:
                 
                 if cg_representation:
-                    pass # TODO: Gt smoothing does not use CG representation
+                    pass
                 else:
                     r = freqs[ngram]
                     freq = gt.prob(r)
-                    #print r
-                    #print 'myfreq', freq
-                    #print 'defreq', gt_freq.prob(ngram)
             
             elif kn_smooth:
                 freq = kneserney.modkn(ngram, text_fds[t])
@@ -199,107 +179,12 @@ def create_ngram_feats(ngrams, order, text_fds, cg_representation=False, kn_smoo
                 if occurrences > 0:
                     lowerord_ng = ngram[:-1]
                     c_sum = text_fds[t][order-2][lowerord_ng]
-                    #print ngram, lowerord_ng, occurrences, c_sum
                     freq = occurrences / float(c_sum)
-                #if ngram == (u't', u'h', u'e'):
-                #    print ngram, occurrences, c_sum, freq, freqs.freq(ngram)
             else:
                 freq = freqs.freq(ngram)
                 
             feature_matrix[t].append(freq)
-        
-        #print sum(feature_matrix[t])
-            
-    #end = time.time()
-    #print os.getpid(), ": Used", (end-start)/n_texts, "seconds per text"
     
-    return feature_matrix
-
-##  Only used for multi-version
-
-#def get_text_cngs(texts, corpus_root, ngram_size):
-#    '''
-#    For each text, get a list of all char n-grams occurring the text
-#    '''
-#    
-#    ngs = []
-#    corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
-#    for text in texts:
-#        
-#        if not text.endswith(".txt"):
-#            continue
-#    
-#        if not len(corpus.raw(text)) == 0:
-#            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-#            char_ng = ngrams(text_str, ngram_size)
-#            ngs.append(char_ng)
-#        else:
-#            ngs.append([])
-#            
-#    return ngs
-
-## Only used for multi-version ##
-
-#def get_cngs(texts, corpus_root, ngram_size):
-#    '''
-#    Get a list of all char n-grams occurring in some texts
-#    '''
-#    
-#    ngs = []
-#    
-#    corpus = PlaintextCorpusReader(corpus_root, '.*txt', encoding='UTF-8')
-#    for text in texts:
-#        
-#        if not text.endswith(".txt"):
-#            continue
-#    
-#        if not len(corpus.raw(text)) == 0:
-#            text_str = corpus.raw(text).replace('\r','').replace('\n', ' ')
-#            char_ng = ngrams(text_str, ngram_size)
-#            ngs.extend(char_ng)
-#            
-#    return ngs 
-
-    
-
-   
-# TODO: Not used(?)
-def extract_fws(texts, corpus, fw_root):
-    n_texts = len(texts)
-    feature_matrix = [[] for i in range(n_texts)]
-    
-    func_wrds = load_wrds(fw_root)
-    text_fws = []
-    
-    for text in texts:
-        
-        if not text.endswith(".txt"):
-            continue
-        
-        wrd_tokens = corpus.words(text)
-        empty = len(corpus.raw(text)) == 0
-        
-        if not empty:
-            lower_wrds = [w.lower() for w in wrd_tokens if w.isalnum()]
-            my_func_wrds = [w for w in lower_wrds if func_wrds.count(w) > 0]
-            text_fws.append(my_func_wrds)
-        else:
-            text_fws.append([])
-            
-    return func_wrds, text_fws
-
-# TODO: Not used(?)
-def create_fw_features(func_words, text_fws):
-    print "Attaching function words to list of features"
-    n_texts = len(text_fws)
-    feature_matrix = [[] for i in range(n_texts)]
-    for t in range(n_texts):
-        print 'Text', t
-        freqs = FreqDist(text_fws[t])
-        for f in func_words:
-            freq = freqs.freq(f)
-            feature_matrix[t].append(freq)
-            
     return feature_matrix
     
 def save_features(feature_file=None, feature_matrix=None,\

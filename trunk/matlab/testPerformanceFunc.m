@@ -51,27 +51,27 @@ c = [0;0;0;0;0;0;0;0;0];
 tc = [1;1;1;2;2;2;3;3;3];
 [a, cp, cr, cf] = performance(c,tc,3);
 assertEqual(a,0);
-assertEqual(cp,[NaN;NaN;NaN]);
+assertEqual(cp,[1;1;1]);
 assertEqual(cr,[0;0;0]);
-assertEqual(cf,[NaN;NaN;NaN]);
+assertEqual(cf,[0;0;0]);
 
 function test7
 c = [1;1;1;1;1;1;1;1;1];
 tc = [1;1;1;2;2;2;3;3;3];
 [a, cp, cr, cf] = performance(c,tc,3);
 assertEqual(a,3.0/9);
-assertEqual(cp,[3.0/9;NaN;NaN]);
+assertEqual(cp,[3.0/9;1;1]);
 assertEqual(cr,[1;0;0]);
-assertEqual(cf,[(2*(3.0/9)*1)/((3.0/9)+1);NaN;NaN]);
+assertEqual(cf,[(2*(3.0/9)*1)/((3.0/9)+1);0;0]);
 
 function test8
 c = [1;1;1;1;2;2;2;2;2];
 tc = [1;1;1;2;2;2;2;2;2];
 [a, cp, cr, cf] = performance(c,tc,3);
 assertEqual(a,8.0/9);
-assertEqual(cp,[3.0/4;1;NaN]);
-assertEqual(cr,[1;5.0/6;NaN]);
-assertEqual(cf,[(2*(3.0/4)*1)/((3.0/4)+1);(2*(5.0/6)*1)/((5.0/6)+1);NaN]);
+assertEqual(cp,[3.0/4;1;1]);
+assertEqual(cr,[1;5.0/6;1]);
+assertEqual(cf,[(2*(3.0/4)*1)/((3.0/4)+1);(2*(5.0/6)*1)/((5.0/6)+1);1]);
 
 function test9
 c = [1;2;1;1;1;1;3;1;3];
@@ -79,5 +79,5 @@ tc = [1;1;1;2;2;2;2;2;2];
 [a, cp, cr, cf] = performance(c,tc,3);
 assertEqual(a,2.0/9);
 assertEqual(cp,[2.0/6;0;0]);
-assertEqual(cr,[2.0/3;0;NaN]);
-assertEqual(cf,[(2*(2.0/6)*(2.0/3))/((2.0/6)+(2.0/3));0;NaN]);
+assertEqual(cr,[2.0/3;0;1]);
+assertEqual(cf,[(2*(2.0/6)*(2.0/3))/((2.0/6)+(2.0/3));0;0]);
